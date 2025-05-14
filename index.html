@@ -3,384 +3,183 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base target="_top">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
       body {
-        font-family: 'Arial';
         background: #f6f1ea;
-        padding: 2rem;
-        margin: 0;
-        position: relative;
-      }
-      input[type="text"],
-      input[type="number"] {
-        font-size: 1rem;
-        padding: 0.75rem;
-        min-height: 44px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        width: 100%;
-        max-width: 400px;
-        margin-bottom: 1rem;
-      }
-      .product-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
       }
       .product-card {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        padding: 1rem;
+        height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
       }
       .product-card img {
-        width: 100%;
-        border-radius: 6px;
         height: 180px;
         object-fit: contain;
       }
-      .title {
-        font-weight: bold;
-        margin: 0.5rem 0 0.2rem;
-        word-break: break-word;
+      .card-actions {
+        margin-top: auto;
       }
-      .price {
-        font-size: 1.1rem;
-        color: #2d2d2d;
-        margin-bottom: 0.5rem;
-      }
-      .btn, .pagination button {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        background: #3b2314;
-        color: white;
-        padding: 0.75rem 1.2rem;
-        border-radius: 5px;
-        text-decoration: none;
-        cursor: pointer;
-        min-width: 44px;
-        min-height: 44px;
-        font-size: 1rem;
-        border: none;
-        border-radius: 5px;
-      }
-        pagination span {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 44px;
-        font-size: 1rem;
-      }
-      .pagination {
-        margin-top: 1rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      /* Cart button */
-      .cart-button {
-        position: absolute;
-        top: 1rem;
-        right: 2rem;
-        z-index: 10;
-      }
-
-      /* Modal Cart Styles */
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 999;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-      }
-      .modal-content {
-        background-color: #fff;
-        margin: 10% auto;
-        padding: 20px;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 500px;
-      }
-      .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-      }
-      .close:hover,
-      .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-      }
-      .toast {
+      .toast-container {
         position: fixed;
         top: 20px;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: #4CAF50;
-        color: #fff;
-        padding: 1rem 1.5rem;
-        border-radius: 10px;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
         z-index: 10000;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
       }
-      .toast.show {
-        opacity: 1;
-        visibility: visible;
-        animation: pulse 0.5s 3 alternate;
+      @keyframes flash {
+        0%, 100% { background-color: rgba(0, 0, 0, 0); }
+        50% { background-color: rgba(255, 255, 255, 0.8); }
       }
-
-        @keyframes pulse {
-          0% { transform: translate(-50%, -50%) scale(1); }
-          100% { transform: translate(-50%, -50%) scale(1.05); }
-        }
-      
-        @keyframes flash {
-          0%, 100% { 
-            background-color: rgba(0, 0, 0, 0); 
-          }
-          50% { 
-            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent green */
-          }
-        }
-
       .screen-flash {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        pointer-events: none; /* So it doesn't block interaction */
+        pointer-events: none;
         z-index: 9999;
-        animation: flash 0.3s 2; /* Flash 2 times */
+        animation: flash 0.3s 2;
         display: none;
-        }
-
+      }
       .screen-flash.show {
         display: block;
-        }
-
-      .card-actions {
-        margin-top: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
       }
-
-      .qty-input {
-        width: 60px !important;
-        font-size: 1rem;
-        text-align: center;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 0.75rem;
-        min-height: 44px; /* 🔧 Match button height */
-      }
-
-      .action-container {
-        display: flex;
-        align-items: stretch;
-        gap: 0.5rem;
-        margin-top: auto;
-      }
-
-      /* Floating cart icon (hidden by default) */
-      .floating-cart {
-        display: none;
-        position: fixed;
-        bottom: 1.5rem;
-        right: 1.5rem;
-        background-color: #3b2314;
-        color: white;
-        border-radius: 50%;
-        width: 56px;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        font-size: 1.5rem;
-        cursor: pointer;
-        z-index: 1000;
-      }
-
       @media (max-width: 768px) {
-        body {
-          padding: 1rem;
-        }
-
-        .product-grid {
-          /* Improved layout: allows 2 columns on wider phones, 1 on narrower */
-          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-          gap: 0.75rem;
-        }
-
-        .product-card {
-          padding: 0.75rem;
-          display: flex;
-          flex-direction: column;
-        }
-
         .product-card img {
           height: 140px;
-          object-fit: contain;
         }
-
-        .title {
-          font-size: 1rem;
-        }
-
-        .price {
-          font-size: 1rem;
-        }
-
-        .btn, .pagination button {
-          font-size: 0.95rem;
-          padding: 0.6rem 1rem;
-          min-height: 44px;  /* ensures tap target */
-          min-width: 44px;
-        }
-
-        .qty-input {
-          width: 60px !important;
-          font-size: 1rem;
-          padding: 0.4rem;
-          min-height: 44px; /* tap target */
-        }
-
-        .action-container {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 0.5rem;
-          margin-top: auto;
-        }
-
-        .modal-content {
-          margin: 20% auto;
-          padding: 1rem;
-          width: 95%;
-        }
-
-        input[type="text"],
-        input[type="number"] {
-          max-width: 100%;
-          width: 100%;
-          padding: 0.6rem;
-          font-size: 1rem;
-          min-height: 44px; /* tap target */
-        }
-
-        .cart-button {
-          top: 0.5rem;
-          right: 1rem;
-          display: none; /* hide top-right cart button */
-        }
-
-        .toast {
-          font-size: 0.95rem;
-          padding: 0.75rem 1rem;
-        }
-
         .floating-cart {
-          display: flex;
+          display: flex !important;
         }
-      }
-      .form-input {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        box-sizing: border-box;
-        font-size: 16px;
+        .top-cart-button {
+          display: none;
+        }
       }
     </style>
   </head>
-  <body>
-    <div class="cart-button">
-      <button class="btn" onclick="openCart()" aria-label="View shopping cart">🛒 View Cartshop</button>
+  <body class="p-4">
+    <div class="position-absolute top-0 end-0 m-3 top-cart-button">
+      <button class="btn btn-brown" onclick="openCart()" aria-label="View shopping cart">
+        <i class="bi bi-cart"></i> View Cartshop
+      </button>
     </div>
 
-
-    <h2>🛍️ Daftar Produk</h2>
-    <input type="text" id="search" placeholder="Search products..." oninput="filterProducts()">
-    <div id="productContainer" class="product-grid"></div>
-    <div class="pagination">
-      <button onclick="changePage(-1)">Previous</button>
-      <span id="pageInfo"></span>
-      <button onclick="changePage(1)">Next</button>
+    <h2 class="mb-3"><i class="bi bi-bag"></i> Daftar Produk</h2>
+    <div class="mb-3">
+      <input type="text" id="search" class="form-control" placeholder="Search products..." oninput="filterProducts()">
+    </div>
+    <div id="productContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3"></div>
+    <div class="d-flex justify-content-center mt-3">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          <li class="page-item">
+            <button class="page-link" onclick="changePage(-1)">Previous</button>
+          </li>
+          <li class="page-item">
+            <span class="page-link" id="pageInfo"></span>
+          </li>
+          <li class="page-item">
+            <button class="page-link" onclick="changePage(1)">Next</button>
+          </li>
+        </ul>
+      </nav>
     </div>
 
     <!-- Cart Modal -->
-    <div id="cartModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeCart()">&times;</span>
-        <h3>Your Cart</h3>
-        <div id="cartItems"></div>
-        <div id="cartTotal"></div>
-        <!-- Button Container: side-by-side -->
-        <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
-          <button class="btn" onclick="clearCart()">❌ Clear All</button>
-          <button id="checkoutBtn" class="btn" onclick="checkoutCart()">🛒 Checkout</button>
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="cartModalLabel">Your Cart</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCart()"></button>
+          </div>
+          <div class="modal-body">
+            <div id="cartItems"></div>
+            <div id="cartTotal"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" onclick="clearCart()">
+              <i class="bi bi-x-circle"></i> Clear All
+            </button>
+            <button type="button" id="checkoutBtn" class="btn btn-primary" onclick="checkoutCart()">
+              <i class="bi bi-cart-check"></i> Checkout
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div id="toast" class="toast">
-      <span style="margin-right: 0.5rem;">✅</span>
-      <span id="toast-message">Item added to cart!</span>
+    <!-- Toast Notification -->
+    <div class="toast-container">
+      <div id="toast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body">
+          <i class="bi bi-check-circle me-2"></i>
+          <span id="toast-message">Item added to cart!</span>
+        </div>
+      </div>
     </div>
 
     <div id="screen-flash" class="screen-flash"></div>
 
-    <div class="floating-cart" onclick="openCart()" title="View Cart">
-      🛒
+    <div class="position-fixed bottom-0 end-0 m-3 floating-cart d-none">
+      <button class="btn btn-brown rounded-circle p-3" onclick="openCart()" title="View Cart">
+        <i class="bi bi-cart fs-4"></i>
+      </button>
     </div>
 
     <!-- Checkout Modal -->
-    <div id="checkoutModal" class="modal" style="display:none;">
-      <div class="modal-content">
-        <span class="close" onclick="closeCheckout()">&times;</span>
-        <h3>Checkout</h3>
-        <form id="checkoutForm">
-          <input type="text" id="custName" placeholder="Name" required class="form-input">
-          <input type="number" id="custPhone" placeholder="WhatsApp Number" required class="form-input">        
-          <input type="email" id="custEmail" placeholder="Email" class="form-input">
-          <textarea id="custAddress" placeholder="Shipping Address" required class="form-input" rows="3"></textarea>
-          
-          <!-- Align button right -->
-          <div style="text-align: right; margin-top: 10px;">
-            <button type="submit" class="btn">🧾 Submit Order</button>
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="checkoutModalLabel">Checkout</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCheckout()"></button>
           </div>
-        </form>
+          <div class="modal-body">
+            <form id="checkoutForm">
+              <div class="mb-3">
+                <input type="text" id="custName" class="form-control" placeholder="Name" required>
+              </div>
+              <div class="mb-3">
+                <input type="number" id="custPhone" class="form-control" placeholder="WhatsApp Number" required>
+              </div>
+              <div class="mb-3">
+                <input type="email" id="custEmail" class="form-control" placeholder="Email">
+              </div>
+              <div class="mb-3">
+                <textarea id="custAddress" class="form-control" placeholder="Shipping Address" required rows="3"></textarea>
+              </div>
+              <div class="text-end">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-receipt"></i> Submit Order
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
 
-
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       let allProducts = [];
       let currentPage = 1;
       const productsPerPage = 16;
       let filteredProducts = [];
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      
+      // Initialize Bootstrap elements
+      const cartModalEl = document.getElementById('cartModal');
+      const cartModal = new bootstrap.Modal(cartModalEl);
+      const checkoutModalEl = document.getElementById('checkoutModal');
+      const checkoutModal = new bootstrap.Modal(checkoutModalEl);
+      const toastEl = document.getElementById('toast');
+      const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
 
       function formatRupiah(number) {
         return "Rp " + Number(number).toLocaleString("id-ID");
@@ -394,19 +193,25 @@
         container.innerHTML = "";
 
         paginated.forEach(p => {
-        const card = `
-          <div class="product-card">
-            <img src="${p.imgUrl}" alt="${p.name}">
-            <div class="title">${p.name}</div>
-            <div class="price">${formatRupiah(p.price)}</div>
-            <div class="action-container">
-              <input type="number" min="1" value="1" id="qty-${p.id}" class="qty-input" />
-              <button type="button" class="btn" onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
-                ➕ Add to Cart
-              </button>
+          const card = `
+            <div class="col">
+              <div class="card h-100 product-card">
+                <img src="${p.imgUrl}" class="card-img-top p-2" alt="${p.name}">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">${p.name}</h5>
+                  <p class="card-text">${formatRupiah(p.price)}</p>
+                  <div class="mt-auto">
+                    <div class="input-group mb-2">
+                      <input type="number" min="1" value="1" id="qty-${p.id}" class="form-control" />
+                      <button type="button" class="btn btn-primary" onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
+                        <i class="bi bi-plus-circle"></i> Add
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        `;
+          `;
           container.innerHTML += card;
         });
 
@@ -440,9 +245,7 @@
           cart.push({ id: productId, name: decodedName, price, quantity });
         }
         
-        // ✅ Auto-reset quantity input to 1
         qtyInput.value = 1;
-
         saveCart();
         showToast(`Added ${quantity} × ${decodedName} to cart!`);
       }
@@ -451,56 +254,56 @@
         localStorage.setItem("cart", JSON.stringify(cart));
       }
 
-    function openCart() {
-      const cartModal = document.getElementById("cartModal");
-      const cartItems = document.getElementById("cartItems");
-      const cartTotal = document.getElementById("cartTotal");
-      const checkoutBtn = document.getElementById("checkoutBtn"); // <-- Get the button
-      cartItems.innerHTML = "";
+      function openCart() {
+        const cartItems = document.getElementById("cartItems");
+        const cartTotal = document.getElementById("cartTotal");
+        const checkoutBtn = document.getElementById("checkoutBtn");
+        cartItems.innerHTML = "";
 
-      let total = 0;
+        let total = 0;
 
-      if (cart.length === 0) {
-        cartItems.innerHTML = "<p>Your cart is empty.</p>";
-        cartTotal.innerHTML = "";
-        checkoutBtn.style.display = "none"; // 🔴 Hide button
-      } else {
-        cart.forEach((item, index) => {
-          const itemTotal = item.price * item.quantity;
-          total += itemTotal;
-          cartItems.innerHTML += `
-            <div style="margin-bottom: 1rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong>${item.name}</strong>
-                <button onclick="removeFromCart('${encodeURIComponent(item.id)}')" 
-                  style="background: none; border: none; font-size: 1.4rem; cursor: pointer; 
-                        width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;"
-                  title="Remove item">❌</button>
+        if (cart.length === 0) {
+          cartItems.innerHTML = "<p>Your cart is empty.</p>";
+          cartTotal.innerHTML = "";
+          checkoutBtn.style.display = "none";
+        } else {
+          cart.forEach((item, index) => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+            cartItems.innerHTML += `
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <strong>${item.name}</strong>
+                  <button onclick="removeFromCart('${encodeURIComponent(item.id)}')" 
+                    class="btn btn-sm btn-danger" title="Remove item">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+                <div class="mt-1">
+                  <div class="input-group">
+                    <input type="number" min="0" value="${item.quantity}"
+                      class="form-control form-control-sm" 
+                      onchange="updateCartQuantity('${encodeURIComponent(item.id)}', this.value)">
+                    <span class="input-group-text">× ${formatRupiah(item.price)}</span>
+                    <span class="input-group-text">${formatRupiah(itemTotal)}</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <input type="number" min="0" value="${item.quantity}"
-                  inputmode="numeric"
-                  style="width: 60px; padding: 0.5rem; margin-top: 0.2rem;" 
-                  onchange="updateCartQuantity('${encodeURIComponent(item.id)}', this.value)">
-                × ${formatRupiah(item.price)} = ${formatRupiah(itemTotal)}
-              </div>
-            </div>
-          `;
-        });
+            `;
+          });
 
-        cartTotal.innerHTML = `<hr><strong>Total: ${formatRupiah(total)}</strong>`;
-        checkoutBtn.style.display = "inline-block"; // ✅ Show button
+          cartTotal.innerHTML = `<hr><p class="fs-5 fw-bold">Total: ${formatRupiah(total)}</p>`;
+          checkoutBtn.style.display = "inline-block";
+        }
+
+        cartModal.show();
       }
-
-      cartModal.style.display = "block";
-    }
-
 
       function removeFromCart(productId) {
         const decodedId = decodeURIComponent(productId);
         cart = cart.filter(item => item.id !== decodedId);
         saveCart();
-        openCart(); // Refresh modal contents
+        openCart();
       }
 
       function updateCartQuantity(productId, newQty) {
@@ -509,18 +312,18 @@
         const itemIndex = cart.findIndex(item => item.id === productId);
         if (itemIndex > -1) {
           if (newQty <= 0) {
-            cart.splice(itemIndex, 1); // Remove item
+            cart.splice(itemIndex, 1);
           } else {
-            cart[itemIndex].quantity = newQty; // Update quantity
+            cart[itemIndex].quantity = newQty;
           }
         }
 
         saveCart();
-        openCart(); // Re-render cart view
+        openCart();
       }
 
       function closeCart() {
-        document.getElementById("cartModal").style.display = "none";
+        cartModal.hide();
       }
 
       function clearCart() {
@@ -529,93 +332,69 @@
         openCart();
       }
 
-      window.onclick = function(event) {
-        const modal = document.getElementById("cartModal");
-        if (event.target === modal) {
-          modal.style.display = "none";
-        }
-      }
-
       function showToast(message) {
-        const toast = document.getElementById("toast");
         const messageSpan = document.getElementById("toast-message");
         const screenFlash = document.getElementById("screen-flash");
 
         messageSpan.textContent = message;
-
-        // Show toast
-        toast.classList.remove("show");
-        void toast.offsetWidth; // Trigger reflow
-        toast.classList.add("show");
         
-        // Show screen flash
+        toast.show();
+        
         screenFlash.classList.remove("show");
-        void screenFlash.offsetWidth; // Trigger reflow
+        void screenFlash.offsetWidth;
         screenFlash.classList.add("show");
 
-        // Hide both after delay
         setTimeout(() => {
-          toast.classList.remove("show");
           screenFlash.classList.remove("show");
         }, 2000);
       }
 
-        // ✅ Load products with caching
-        const CACHE_KEY = "product_cache";
-        const CACHE_TIME_KEY = "product_cache_time";
-        const CACHE_EXPIRY_MS = 1000 * 60 * 5; // 5 minutes
-
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY);
-        const urlParams = new URLSearchParams(window.location.search);
-        const noCache = urlParams.get('nocache') === '1';
-
-        if (!noCache && cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_EXPIRY_MS) {
-          allProducts = JSON.parse(cached);
-          filteredProducts = allProducts;
-          renderProducts(filteredProducts);
-        } else {
-          google.script.run.withSuccessHandler(products => {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(products));
-            localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-            allProducts = products;
-            filteredProducts = allProducts;
-            renderProducts(filteredProducts);
-          }).getProducts();
-        }
-
       function checkoutCart() {
-        document.getElementById("checkoutModal").style.display = "block";
+        cartModal.hide();
+        checkoutModal.show();
       }
 
       function closeCheckout() {
-        document.getElementById("checkoutModal").style.display = "none";
+        checkoutModal.hide();
       }
 
-    fetch("https://script.google.com/macros/s/AKfycbwmBMvBfMVMQ6lhd6h2iNpeSkVsjCzyqTwkWJqtUPReNDjPM0lUqQRZkvixQp6IDB1Lqw/exec", {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: {
-        "Content-Type": "application/json"
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert("Order submitted! Thank you.");
-          closeCart();
-          closeCheckout();
-          clearCart();
-        } else {
-          console.error("Error:", data.error);
-          alert("Order failed. Check console for details.");
-        }
-      })
-      .catch(err => {
-        console.error("Request failed:", err);
-        alert("Failed to submit order. Try again later.");
-      });
+      // ✅ Load products with caching
+      const CACHE_KEY = "product_cache";
+      const CACHE_TIME_KEY = "product_cache_time";
+      const CACHE_EXPIRY_MS = 1000 * 60 * 5; // 5 minutes
 
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY);
+      const urlParams = new URLSearchParams(window.location.search);
+      const noCache = urlParams.get('nocache') === '1';
+
+      if (!noCache && cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_EXPIRY_MS) {
+        allProducts = JSON.parse(cached);
+        filteredProducts = allProducts;
+        renderProducts(filteredProducts);
+      } else {
+        google.script.run.withSuccessHandler(products => {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(products));
+          localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+          allProducts = products;
+          filteredProducts = allProducts;
+          renderProducts(filteredProducts);
+        }).getProducts();
+      }
+
+      // Add custom Bootstrap theme color
+      document.head.insertAdjacentHTML('beforeend', `
+        <style>
+          .btn-brown {
+            background-color: #3b2314;
+            color: white;
+          }
+          .btn-brown:hover {
+            background-color: #523524;
+            color: white;
+          }
+        </style>
+      `);
     </script>
   </body>
 </html>
