@@ -45,7 +45,7 @@
         z-index: 9999;
         animation: flash 0.3s 2;
         display: none;
-      }
+        }
       .screen-flash.show {
         display: block;
       }
@@ -103,9 +103,9 @@
 
         /* Adjust input groups for better touch */
         .input-group {
-          flex-direction: column;
-          gap: 0.5rem;
-        }
+        flex-direction: column;
+        gap: 0.5rem;
+      }
 
         .input-group > * {
           width: 100% !important;
@@ -119,13 +119,13 @@
         }
 
         .floating-cart .btn {
-          width: 56px;
-          height: 56px;
+        width: 56px;
+        height: 56px;
           padding: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
         /* Adjust modal content for mobile */
         .modal-body {
@@ -169,6 +169,50 @@
         .product-name {
           font-size: 0.85rem;
           min-height: 35px;
+        }
+
+        .quantity-control {
+          max-width: none;
+        }
+        
+        .quantity-control .form-control,
+        .quantity-control .btn {
+          height: 38px;
+        }
+        
+        .input-group {
+          flex-direction: row !important;
+          width: 100% !important;
+        }
+        
+        .input-group > * {
+          width: auto !important;
+          border-radius: 0 !important;
+        }
+
+        /* Cart modal specific adjustments */
+        #cartItems .input-group,
+        #cartItems .quantity-control {
+          flex-direction: row !important;
+          flex-wrap: nowrap !important;
+        }
+        
+        /* Ensure proper alignment in the cart */
+        #cartItems .mt-1 {
+          flex-wrap: wrap;
+        }
+        
+        /* Make price appear below on very small screens if needed */
+        @media (max-width: 380px) {
+          #cartItems .mt-1 {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+          
+          #cartItems .fw-bold {
+            margin-top: 0.5rem;
+            align-self: flex-end;
+          }
         }
       }
 
@@ -292,27 +336,27 @@
       .quantity-control {
         display: flex;
         align-items: center;
+        width: 100%;
       }
-
+      
       .quantity-control .form-control {
-        flex: 1;
+        flex: 0 0 auto;
+        width: 50px;
         text-align: center;
         border-radius: 0;
-        -moz-appearance: textfield; /* Remove the spinner for Firefox */
+        margin: 0 -1px;
+        padding-left: 0;
+        padding-right: 0;
       }
-
-      .quantity-control .form-control::-webkit-inner-spin-button,
-      .quantity-control .form-control::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-
+      
       .quantity-control .btn {
+        flex: 0 0 auto;
         min-width: 38px;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        z-index: 1;
       }
     </style>
   </head>
@@ -386,20 +430,20 @@
             </ul>
           </nav>
         </div>
-      </div>
+    </div>
     </section>
 
     <!-- Cart Modal -->
     <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+      <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="cartModalLabel">Your Cart</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCart()"></button>
           </div>
           <div class="modal-body">
-            <div id="cartItems"></div>
-            <div id="cartTotal"></div>
+        <div id="cartItems"></div>
+        <div id="cartTotal"></div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-danger" onclick="clearCart()">
@@ -418,7 +462,7 @@
       <div id="toast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-body">
           <i class="bi bi-check-circle me-2"></i>
-          <span id="toast-message">Item added to cart!</span>
+      <span id="toast-message">Item added to cart!</span>
         </div>
       </div>
     </div>
@@ -438,13 +482,13 @@
     <!-- Checkout Modal -->
     <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+      <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="checkoutModalLabel">Checkout</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCheckout()"></button>
           </div>
           <div class="modal-body">
-            <form id="checkoutForm">
+        <form id="checkoutForm">
               <div class="mb-3">
                 <input type="text" id="custName" class="form-control" placeholder="Name" required>
               </div>
@@ -518,7 +562,7 @@
         container.innerHTML = "";
 
         paginated.forEach(p => {
-          const card = `
+        const card = `
             <div class="col mb-5">
               <div class="card h-100">
                 <!-- Product image-->
@@ -561,13 +605,13 @@
                       >
                         <i class="bi-cart-plus me-1"></i>
                         Add to cart
-                      </button>
+              </button>
                     </div>
                   </div>
                 </div>
-              </div>
             </div>
-          `;
+          </div>
+        `;
           container.innerHTML += card;
         });
 
@@ -611,42 +655,42 @@
         updateCartCount();
       }
 
-      function openCart() {
-        const cartItems = document.getElementById("cartItems");
-        const cartTotal = document.getElementById("cartTotal");
+    function openCart() {
+      const cartItems = document.getElementById("cartItems");
+      const cartTotal = document.getElementById("cartTotal");
         const checkoutBtn = document.getElementById("checkoutBtn");
-        cartItems.innerHTML = "";
+      cartItems.innerHTML = "";
 
-        let total = 0;
+      let total = 0;
 
-        if (cart.length === 0) {
-          cartItems.innerHTML = "<p>Your cart is empty.</p>";
-          cartTotal.innerHTML = "";
+      if (cart.length === 0) {
+        cartItems.innerHTML = "<p>Your cart is empty.</p>";
+        cartTotal.innerHTML = "";
           checkoutBtn.style.display = "none";
-        } else {
-          cart.forEach((item, index) => {
-            const itemTotal = item.price * item.quantity;
-            total += itemTotal;
-            cartItems.innerHTML += `
+      } else {
+        cart.forEach((item, index) => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+          cartItems.innerHTML += `
               <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-center">
-                  <strong>${item.name}</strong>
-                  <button onclick="removeFromCart('${encodeURIComponent(item.id)}')" 
+                <strong>${item.name}</strong>
+                <button onclick="removeFromCart('${encodeURIComponent(item.id)}')" 
                     class="btn btn-sm btn-danger" title="Remove item">
                     <i class="bi bi-x-lg"></i>
                   </button>
-                </div>
+              </div>
                 <div class="mt-1 d-flex justify-content-between align-items-center">
                   <div class="quantity-control input-group me-2" style="max-width: 140px;">
-                    <button class="btn btn-outline-secondary" 
+                    <button class="btn btn-outline-secondary btn-sm" 
                       onclick="updateCartQuantity('${encodeURIComponent(item.id)}', ${item.quantity - 1})" 
                       type="button">
                       <i class="bi bi-dash"></i>
                     </button>
                     <input type="number" min="1" value="${item.quantity}"
                       class="form-control form-control-sm text-center" 
-                      onchange="updateCartQuantity('${encodeURIComponent(item.id)}', this.value)">
-                    <button class="btn btn-outline-secondary" 
+                  onchange="updateCartQuantity('${encodeURIComponent(item.id)}', this.value)">
+                    <button class="btn btn-outline-secondary btn-sm" 
                       onclick="updateCartQuantity('${encodeURIComponent(item.id)}', ${item.quantity + 1})" 
                       type="button">
                       <i class="bi bi-plus"></i>
@@ -656,16 +700,16 @@
                     ${formatRupiah(itemTotal)}
                   </div>
                 </div>
-              </div>
-            `;
-          });
+            </div>
+          `;
+        });
 
           cartTotal.innerHTML = `<hr><p class="fs-5 fw-bold">Total: ${formatRupiah(total)}</p>`;
           checkoutBtn.style.display = "inline-block";
-        }
+      }
 
         cartModal.show();
-      }
+    }
 
       function removeFromCart(productId) {
         const decodedId = decodeURIComponent(productId);
@@ -705,7 +749,7 @@
         const screenFlash = document.getElementById("screen-flash");
 
         messageSpan.textContent = message;
-        
+
         toast.show();
         
         screenFlash.classList.remove("show");
@@ -726,23 +770,23 @@
         checkoutModal.hide();
       }
 
-      // ✅ Load products with caching
-      const CACHE_KEY = "product_cache";
-      const CACHE_TIME_KEY = "product_cache_time";
-      const CACHE_EXPIRY_MS = 1000 * 60 * 5; // 5 minutes
+        // ✅ Load products with caching
+        const CACHE_KEY = "product_cache";
+        const CACHE_TIME_KEY = "product_cache_time";
+        const CACHE_EXPIRY_MS = 1000 * 60 * 5; // 5 minutes
 
-      const cached = sessionStorage.getItem(CACHE_KEY);
-      const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY);
-      const urlParams = new URLSearchParams(window.location.search);
-      const noCache = urlParams.get('nocache') === '1';
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY);
+        const urlParams = new URLSearchParams(window.location.search);
+        const noCache = urlParams.get('nocache') === '1';
 
       const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwmBMvBfMVMQ6lhd6h2iNpeSkVsjCzyqTwkWJqtUPReNDjPM0lUqQRZkvixQp6IDB1Lqw/exec';
 
-      if (!noCache && cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_EXPIRY_MS) {
-        allProducts = JSON.parse(cached);
-        filteredProducts = allProducts;
-        renderProducts(filteredProducts);
-      } else {
+        if (!noCache && cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_EXPIRY_MS) {
+          allProducts = JSON.parse(cached);
+          filteredProducts = allProducts;
+          renderProducts(filteredProducts);
+        } else {
         fetch(`${SCRIPT_URL}?action=getProducts`)
           .then(response => response.json())
           .then(products => {
@@ -773,18 +817,18 @@
         
         fetch(SCRIPT_URL, {
           method: 'POST',
-          headers: {
+      headers: {
             'Content-Type': 'application/json'
-          },
+      },
           body: JSON.stringify(payload)
-        })
+    })
         .then(response => response.json())
-        .then(data => {
-          if (data.success) {
+      .then(data => {
+        if (data.success) {
             alert('Order submitted! Thank you.');
             window.checkoutModal.hide();
-            clearCart();
-          } else {
+          clearCart();
+        } else {
             console.error('Error:', data.error);
             alert('Order failed: ' + data.error);
           }
