@@ -221,6 +221,22 @@
         <div id="productContainer" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
           <!-- Products will be dynamically inserted here -->
         </div>
+        <!-- Add pagination controls -->
+        <div class="d-flex justify-content-center mt-4">
+          <nav aria-label="Product navigation">
+            <ul class="pagination">
+              <li class="page-item">
+                <button class="page-link" onclick="changePage(-1)">Previous</button>
+              </li>
+              <li class="page-item">
+                <span class="page-link" id="pageInfo">Page 1 of 1</span>
+              </li>
+              <li class="page-item">
+                <button class="page-link" onclick="changePage(1)">Next</button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </section>
 
