@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#f6f1ea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <base target="_top">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Its Okay to Buy - Shop Homepage</title>
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
     <style>
       body {
         background: #f6f1ea;
@@ -188,33 +186,43 @@
       }
     </style>
   </head>
-  <body class="p-4">
-    <div class="position-absolute top-0 end-0 m-3 top-cart-button">
-      <button class="btn btn-brown" onclick="openCart()" aria-label="View shopping cart">
-        <i class="bi bi-cart"></i> View Cartshop
-      </button>
-    </div>
-
-    <h2 class="mb-3"><i class="bi bi-bag"></i> Daftar Produk</h2>
-    <div class="mb-3">
-      <input type="text" id="search" class="form-control" placeholder="Search products..." oninput="filterProducts()">
-    </div>
-    <div id="productContainer" class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2"></div>
-    <div class="d-flex justify-content-center mt-3">
-      <nav aria-label="Page navigation">
-        <ul class="pagination">
-          <li class="page-item">
-            <button class="page-link" onclick="changePage(-1)">Previous</button>
-          </li>
-          <li class="page-item">
-            <span class="page-link" id="pageInfo"></span>
-          </li>
-          <li class="page-item">
-            <button class="page-link" onclick="changePage(1)">Next</button>
-          </li>
-        </ul>
-      </nav>
-    </div>
+  <body>
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container px-4 px-lg-5">
+        <a class="navbar-brand" href="#">Its Okay to Buy</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <form class="d-flex ms-auto">
+            <input class="form-control me-2" type="search" id="search" placeholder="Search products..." oninput="filterProducts()">
+          </form>
+          <button class="btn btn-outline-dark ms-2" onclick="openCart()">
+            <i class="bi-cart-fill me-1"></i>
+            Cart
+            <span class="badge bg-dark text-white ms-1 rounded-pill" id="cartCount">0</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+    <!-- Header-->
+    <header class="bg-dark py-5">
+      <div class="container px-4 px-lg-5 my-5">
+        <div class="text-center text-white">
+          <h1 class="display-4 fw-bolder">Daftar Produk</h1>
+          <p class="lead fw-normal text-white-50 mb-0">Find what you love</p>
+        </div>
+      </div>
+    </header>
+    <!-- Section-->
+    <section class="py-5">
+      <div class="container px-4 px-lg-5 mt-5">
+        <div id="productContainer" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+          <!-- Products will be dynamically inserted here -->
+        </div>
+      </div>
+    </section>
 
     <!-- Cart Modal -->
     <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
@@ -291,8 +299,15 @@
       </div>
     </div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Footer-->
+    <footer class="py-5 bg-dark">
+      <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Its Okay to Buy 2024</p></div>
+    </footer>
+
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="js/scripts.js"></script>
     <script>
       let allProducts = [];
       let currentPage = 1;
@@ -318,6 +333,7 @@
           window.cartModal = cartModal;
           window.checkoutModal = checkoutModal;
           window.toast = toast;
+          updateCartCount();
         }
       });
 
@@ -334,27 +350,36 @@
 
         paginated.forEach(p => {
           const card = `
-            <div class="col mb-2">
-              <div class="card h-100 product-card">
-                <img src="${p.imgUrl}" class="card-img-top" alt="${p.name}">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title text-truncate" title="${p.name}">${p.name}</h5>
-                  <p class="card-text">${formatRupiah(p.price)}</p>
-                  <div class="mt-auto">
-                    <div class="d-flex flex-column gap-2">
-                      <input type="number" 
-                        min="1" 
-                        value="1" 
-                        id="qty-${p.id}" 
-                        class="form-control" 
-                        inputmode="numeric"
-                        pattern="[0-9]*"
-                      />
-                      <button type="button" 
-                        class="btn btn-primary w-100" 
+            <div class="col mb-5">
+              <div class="card h-100">
+                <!-- Product image-->
+                <img class="card-img-top" src="${p.imgUrl}" alt="${p.name}" />
+                <!-- Product details-->
+                <div class="card-body p-4">
+                  <div class="text-center">
+                    <!-- Product name-->
+                    <h5 class="fw-bolder text-truncate" title="${p.name}">${p.name}</h5>
+                    <!-- Product price-->
+                    ${formatRupiah(p.price)}
+                  </div>
+                </div>
+                <!-- Product actions-->
+                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                  <div class="d-flex flex-column gap-2">
+                    <input type="number" 
+                      min="1" 
+                      value="1" 
+                      id="qty-${p.id}" 
+                      class="form-control" 
+                      inputmode="numeric"
+                      pattern="[0-9]*"
+                    />
+                    <div class="text-center">
+                      <button class="btn btn-outline-dark mt-auto" 
                         onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')"
                       >
-                        <i class="bi bi-plus-circle me-1"></i> Add to Cart
+                        <i class="bi-cart-plus me-1"></i>
+                        Add to cart
                       </button>
                     </div>
                   </div>
@@ -402,6 +427,7 @@
 
       function saveCart() {
         localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
       }
 
       function openCart() {
@@ -590,6 +616,11 @@
           }
         </style>
       `);
+
+      function updateCartCount() {
+        const count = cart.reduce((total, item) => total + item.quantity, 0);
+        document.getElementById('cartCount').textContent = count;
+      }
     </script>
   </body>
 </html>
