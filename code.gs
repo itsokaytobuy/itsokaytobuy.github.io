@@ -1,21 +1,20 @@
 function doGet(e) {
-  // Handle case when e is undefined (running directly in editor)
-  if (!e || !e.parameter) {
+  // If e or e.parameter is missing, or action is not present, serve HTML
+  if (!e || !e.parameter || !e.parameter.action) {
     const html = HtmlService.createHtmlOutputFromFile("index");
     html.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     return html;
   }
-  
-  // Normal execution with parameters
+
+  // If action is present, handle API
   const action = e.parameter.action;
-  
+
   if (action === 'getProducts') {
     return ContentService.createTextOutput(JSON.stringify(getProducts()))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader('Access-Control-Allow-Origin', '*');
+      .setMimeType(ContentService.MimeType.JSON);
   }
-  
-  // Default - serve the webapp
+
+  // Fallback: serve HTML
   const html = HtmlService.createHtmlOutputFromFile("index");
   html.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   return html;
@@ -101,12 +100,10 @@ function doPost(e) {
 
     // Return JSON response with CORS headers
     return ContentService.createTextOutput(JSON.stringify({ success: true }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader("Access-Control-Allow-Origin", "*");
+      .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader("Access-Control-Allow-Origin", "*");
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
