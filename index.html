@@ -212,7 +212,7 @@
       .product-name {
         min-height: 40px;       /* Fixed height area for product name */
         line-height: 1.3;       /* Comfortable line spacing */
-        font-weight: normal;    /* Remove bold formatting */
+        font-weight: bold;      /* Restore bold formatting */
         overflow: hidden;       /* Hide overflow */
         font-size: 0.95rem;     /* Slightly smaller font */
         margin-bottom: 0.5rem;
@@ -407,7 +407,7 @@
                 <div class="card-body p-4">
                   <div class="text-center">
                     <!-- Product name-->
-                    <h5 class="product-name" title="${p.name}">${p.name}</h5>
+                    <h5 class="product-name fw-bolder" title="${p.name}">${p.name}</h5>
                     <!-- Product price-->
                     ${formatRupiah(p.price)}
                   </div>
