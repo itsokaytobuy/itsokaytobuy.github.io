@@ -334,29 +334,67 @@
 
       /* Add this to your CSS style section */
       .quantity-control {
-        display: flex;
-        align-items: center;
-        width: 100%;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: 100% !important;
       }
       
       .quantity-control .form-control {
-        flex: 0 0 auto;
-        width: 50px;
-        text-align: center;
-        border-radius: 0;
-        margin: 0 -1px;
-        padding-left: 0;
-        padding-right: 0;
+        flex: 0 0 auto !important;
+        width: 50px !important;
+        text-align: center !important;
+        border-radius: 0 !important;
+        margin: 0 -1px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
       }
       
       .quantity-control .btn {
-        flex: 0 0 auto;
-        min-width: 38px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1;
+        flex: 0 0 auto !important;
+        min-width: 38px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 1 !important;
+      }
+
+      /* Strong overrides for mobile devices */
+      @media (max-width: 768px) {
+        /* Force input groups to stay horizontal */
+        .input-group,
+        #cartItems .input-group {
+          display: flex !important;
+          flex-direction: row !important;
+          width: 100% !important;
+          flex-wrap: nowrap !important;
+        }
+        
+        .input-group > *,
+        #cartItems .input-group > * {
+          width: auto !important;
+          border-radius: 0 !important;
+          margin: 0 !important;
+        }
+        
+        .input-group .form-control,
+        #cartItems .input-group .form-control {
+          width: 50px !important;
+          flex-grow: 0 !important;
+        }
+        
+        /* Override any column direction for these specific screen sizes */
+        @media (width: 430px) and (height: 932px) {
+          .quantity-control,
+          .input-group {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+          }
+        }
       }
     </style>
   </head>
