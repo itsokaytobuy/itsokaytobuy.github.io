@@ -184,6 +184,12 @@
           padding-bottom: env(safe-area-inset-bottom) !important;
         }
       }
+
+      /* Add to your existing style section */
+      .pagination {
+        margin: 20px 0;
+        display: flex !important;
+      }
     </style>
   </head>
   <body>
@@ -566,6 +572,8 @@
         allProducts = JSON.parse(cached);
         filteredProducts = allProducts;
         renderProducts(filteredProducts);
+        console.log("Products loaded from cache:", allProducts.length, "products");
+        console.log("Pages required:", Math.ceil(allProducts.length / productsPerPage));
       } else {
         fetch(`${SCRIPT_URL}?action=getProducts`)
           .then(response => response.json())
@@ -575,6 +583,8 @@
             allProducts = products;
             filteredProducts = allProducts;
             renderProducts(filteredProducts);
+            console.log("Products loaded from API:", products.length, "products");
+            console.log("Pages required:", Math.ceil(products.length / productsPerPage));
           })
           .catch(error => {
             console.error('Error fetching products:', error);
