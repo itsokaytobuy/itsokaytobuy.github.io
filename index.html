@@ -59,6 +59,33 @@
           display: none;
         }
       }
+      @media (max-width: 576px) {
+        .product-card img {
+          height: 120px;
+        }
+        
+        .card-title {
+          font-size: 0.9rem;
+        }
+        
+        .input-group {
+          flex-direction: column;
+        }
+        
+        .input-group .form-control,
+        .input-group .btn {
+          width: 100%;
+          border-radius: 0.25rem !important;
+        }
+        
+        .input-group .form-control {
+          margin-bottom: 0.25rem;
+        }
+        
+        .row-cols-1 {
+          --bs-gutter-x: 0.5rem;
+        }
+      }
     </style>
   </head>
   <body class="p-4">
@@ -173,13 +200,26 @@
       let filteredProducts = [];
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
       
-      // Initialize Bootstrap elements
-      const cartModalEl = document.getElementById('cartModal');
-      const cartModal = new bootstrap.Modal(cartModalEl);
-      const checkoutModalEl = document.getElementById('checkoutModal');
-      const checkoutModal = new bootstrap.Modal(checkoutModalEl);
-      const toastEl = document.getElementById('toast');
-      const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof bootstrap === 'undefined') {
+          console.error('Bootstrap JS is not loaded!');
+          alert('Bootstrap JS failed to load');
+        } else {
+          console.log('Bootstrap JS loaded successfully');
+          // Initialize components
+          const cartModalEl = document.getElementById('cartModal');
+          const cartModal = new bootstrap.Modal(cartModalEl);
+          const checkoutModalEl = document.getElementById('checkoutModal');
+          const checkoutModal = new bootstrap.Modal(checkoutModalEl);
+          const toastEl = document.getElementById('toast');
+          const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
+          
+          // Make these available to global scope
+          window.cartModal = cartModal;
+          window.checkoutModal = checkoutModal;
+          window.toast = toast;
+        }
+      });
 
       function formatRupiah(number) {
         return "Rp " + Number(number).toLocaleString("id-ID");
@@ -368,19 +408,64 @@
       const urlParams = new URLSearchParams(window.location.search);
       const noCache = urlParams.get('nocache') === '1';
 
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwmBMvBfMVMQ6lhd6h2iNpeSkVsjCzyqTwkWJqtUPReNDjPM0lUqQRZkvixQp6IDB1Lqw/exec';
+
       if (!noCache && cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_EXPIRY_MS) {
         allProducts = JSON.parse(cached);
         filteredProducts = allProducts;
         renderProducts(filteredProducts);
       } else {
-        google.script.run.withSuccessHandler(products => {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(products));
-          localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-          allProducts = products;
-          filteredProducts = allProducts;
-          renderProducts(filteredProducts);
-        }).getProducts();
+        fetch(`${SCRIPT_URL}?action=getProducts`)
+          .then(response => response.json())
+          .then(products => {
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify(products));
+            sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+            allProducts = products;
+            filteredProducts = allProducts;
+            renderProducts(filteredProducts);
+          })
+          .catch(error => {
+            console.error('Error fetching products:', error);
+          });
       }
+
+      // Add checkout form submission handler:
+      document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const payload = {
+          customer: {
+            name: document.getElementById('custName').value,
+            email: document.getElementById('custEmail').value,
+            phone: document.getElementById('custPhone').value,
+            address: document.getElementById('custAddress').value
+          },
+          cart: cart
+        };
+        
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Order submitted! Thank you.');
+            window.checkoutModal.hide();
+            clearCart();
+          } else {
+            console.error('Error:', data.error);
+            alert('Order failed: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Request failed:', error);
+          alert('Failed to submit order. Try again later.');
+        });
+      });
 
       // Add custom Bootstrap theme color
       document.head.insertAdjacentHTML('beforeend', `

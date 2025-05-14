@@ -1,5 +1,22 @@
-function doGet() {
-  const html = HtmlService.createHtmlOutputFromFile("Index");
+function doGet(e) {
+  // Handle case when e is undefined (running directly in editor)
+  if (!e || !e.parameter) {
+    const html = HtmlService.createHtmlOutputFromFile("index");
+    html.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    return html;
+  }
+  
+  // Normal execution with parameters
+  const action = e.parameter.action;
+  
+  if (action === 'getProducts') {
+    return ContentService.createTextOutput(JSON.stringify(getProducts()))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader('Access-Control-Allow-Origin', '*');
+  }
+  
+  // Default - serve the webapp
+  const html = HtmlService.createHtmlOutputFromFile("index");
   html.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   return html;
 }
