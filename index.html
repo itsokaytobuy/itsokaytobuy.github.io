@@ -239,6 +239,24 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       }
 
+      /* Add this to your CSS style section */
+      .floating-buttons .badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(25%, -25%);
+        font-size: 0.7rem;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .floating-buttons .btn {
+        position: relative;
+      }
+
       /* Add these styles to your CSS section */
       .floating-search-container {
         position: fixed;
@@ -268,6 +286,33 @@
 
       .floating-search-form .btn {
         min-width: 48px;
+      }
+
+      /* Add this to your CSS style section */
+      .quantity-control {
+        display: flex;
+        align-items: center;
+      }
+
+      .quantity-control .form-control {
+        flex: 1;
+        text-align: center;
+        border-radius: 0;
+        -moz-appearance: textfield; /* Remove the spinner for Firefox */
+      }
+
+      .quantity-control .form-control::-webkit-inner-spin-button,
+      .quantity-control .form-control::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .quantity-control .btn {
+        min-width: 38px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     </style>
   </head>
@@ -386,6 +431,7 @@
       </button>
       <button class="btn btn-brown rounded-circle" onclick="openCart()" title="View Cart">
         <i class="bi bi-cart fs-4"></i>
+        <span class="badge bg-danger text-white rounded-pill" id="floatingCartCount">0</span>
       </button>
     </div>
 
@@ -489,14 +535,26 @@
                 <!-- Product actions-->
                 <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
                   <div class="d-flex flex-column gap-2">
-                    <input type="number" 
-                      min="1" 
-                      value="1" 
-                      id="qty-${p.id}" 
-                      class="form-control" 
-                      inputmode="numeric"
-                      pattern="[0-9]*"
-                    />
+                    <div class="quantity-control input-group">
+                      <button class="btn btn-outline-dark" 
+                        onclick="changeQuantity('${p.id}', -1)" 
+                        type="button">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <input type="number" 
+                        min="1" 
+                        value="1" 
+                        id="qty-${p.id}" 
+                        class="form-control" 
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                      />
+                      <button class="btn btn-outline-dark" 
+                        onclick="changeQuantity('${p.id}', 1)" 
+                        type="button">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
                     <div class="text-center">
                       <button class="btn btn-outline-dark mt-auto" 
                         onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')"
@@ -578,13 +636,24 @@
                     <i class="bi bi-x-lg"></i>
                   </button>
                 </div>
-                <div class="mt-1">
-                  <div class="input-group">
-                    <input type="number" min="0" value="${item.quantity}"
-                      class="form-control form-control-sm" 
+                <div class="mt-1 d-flex justify-content-between align-items-center">
+                  <div class="quantity-control input-group me-2" style="max-width: 140px;">
+                    <button class="btn btn-outline-secondary" 
+                      onclick="updateCartQuantity('${encodeURIComponent(item.id)}', ${item.quantity - 1})" 
+                      type="button">
+                      <i class="bi bi-dash"></i>
+                    </button>
+                    <input type="number" min="1" value="${item.quantity}"
+                      class="form-control form-control-sm text-center" 
                       onchange="updateCartQuantity('${encodeURIComponent(item.id)}', this.value)">
-                    <span class="input-group-text">× ${formatRupiah(item.price)}</span>
-                    <span class="input-group-text">${formatRupiah(itemTotal)}</span>
+                    <button class="btn btn-outline-secondary" 
+                      onclick="updateCartQuantity('${encodeURIComponent(item.id)}', ${item.quantity + 1})" 
+                      type="button">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                  <div class="fw-bold">
+                    ${formatRupiah(itemTotal)}
                   </div>
                 </div>
               </div>
@@ -743,6 +812,7 @@
       function updateCartCount() {
         const count = cart.reduce((total, item) => total + item.quantity, 0);
         document.getElementById('cartCount').textContent = count;
+        document.getElementById('floatingCartCount').textContent = count;
       }
 
       function toggleSearchFocus() {
@@ -779,6 +849,17 @@
           }
         }
       }, true);
+
+      // Add this function after the addToCart function
+      function changeQuantity(productId, change) {
+        const qtyInput = document.getElementById(`qty-${productId}`);
+        let newValue = parseInt(qtyInput.value) + change;
+        
+        // Ensure minimum value is 1
+        if (newValue < 1) newValue = 1;
+        
+        qtyInput.value = newValue;
+      }
     </script>
   </body>
 </html>
