@@ -217,6 +217,58 @@
         font-size: 0.95rem;     /* Slightly smaller font */
         margin-bottom: 0.5rem;
       }
+
+      /* Add to your CSS style section */
+      .floating-buttons {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        z-index: 1030;
+      }
+
+      .floating-buttons .btn {
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      }
+
+      /* Add these styles to your CSS section */
+      .floating-search-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 1rem;
+        z-index: 1040;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transform: translateY(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .floating-search-container.show {
+        transform: translateY(0);
+      }
+
+      .floating-search-form {
+        display: flex;
+        width: 100%;
+      }
+
+      .floating-search-form .form-control {
+        min-height: 48px;
+      }
+
+      .floating-search-form .btn {
+        min-width: 48px;
+      }
     </style>
   </head>
   <body>
@@ -239,6 +291,25 @@
         </div>
       </div>
     </nav>
+
+    <!-- Add this after the navbar section -->
+    <div id="floatingSearch" class="floating-search-container">
+      <div class="container">
+        <form class="floating-search-form">
+          <input 
+            type="search" 
+            class="form-control me-2" 
+            id="floatingSearchInput" 
+            placeholder="Search products..." 
+            oninput="syncSearchFields(this.value)"
+          >
+          <button type="button" class="btn btn-outline-dark" onclick="closeFloatingSearch()">
+            <i class="bi bi-x"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
     <!-- Header-->
     <header class="bg-dark py-5">
       <div class="container px-4 px-lg-5 my-5">
@@ -309,8 +380,11 @@
 
     <div id="screen-flash" class="screen-flash"></div>
 
-    <div class="position-fixed bottom-0 end-0 m-3 floating-cart d-none">
-      <button class="btn btn-brown rounded-circle p-3" onclick="openCart()" title="View Cart">
+    <div class="floating-buttons d-md-none">
+      <button class="btn btn-brown rounded-circle" onclick="toggleSearchFocus()" title="Search Products">
+        <i class="bi bi-search fs-4"></i>
+      </button>
+      <button class="btn btn-brown rounded-circle" onclick="openCart()" title="View Cart">
         <i class="bi bi-cart fs-4"></i>
       </button>
     </div>
@@ -670,6 +744,41 @@
         const count = cart.reduce((total, item) => total + item.quantity, 0);
         document.getElementById('cartCount').textContent = count;
       }
+
+      function toggleSearchFocus() {
+        const floatingSearch = document.getElementById('floatingSearch');
+        floatingSearch.classList.add('show');
+        
+        setTimeout(() => {
+          document.getElementById('floatingSearchInput').focus();
+        }, 300);
+      }
+
+      function closeFloatingSearch() {
+        const floatingSearch = document.getElementById('floatingSearch');
+        floatingSearch.classList.remove('show');
+      }
+
+      function syncSearchFields(value) {
+        // Sync the main search field with the floating one
+        document.getElementById('search').value = value;
+        filterProducts();
+      }
+
+      // Add this to your JavaScript (near the bottom, before the closing script tag)
+      document.addEventListener('click', function(event) {
+        const floatingSearch = document.getElementById('floatingSearch');
+        const floatingSearchForm = document.querySelector('.floating-search-form');
+        const searchButton = document.querySelector('.floating-buttons .btn:first-child');
+        
+        // Check if the floating search is visible
+        if (floatingSearch.classList.contains('show')) {
+          // Check if click is outside the search form and not on the search button
+          if (!floatingSearchForm.contains(event.target) && event.target !== searchButton && !searchButton.contains(event.target)) {
+            closeFloatingSearch();
+          }
+        }
+      }, true);
     </script>
   </body>
 </html>
