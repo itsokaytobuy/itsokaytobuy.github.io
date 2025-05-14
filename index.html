@@ -332,19 +332,19 @@
         min-width: 48px;
       }
 
-      /* Add this to your CSS style section */
+      /* Update the quantity control styles to make them more compact */
       .quantity-control {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
-        width: 100% !important;
-        max-width: 100% !important;
+        width: auto !important; /* Changed from 100% to auto */
+        max-width: 120px !important; /* Reduced max-width */
       }
       
       .quantity-control .form-control {
         flex: 0 0 auto !important;
-        width: 50px !important;
+        width: 40px !important; /* Reduced from 50px to 40px */
         text-align: center !important;
         border-radius: 0 !important;
         margin: 0 -1px !important;
@@ -354,7 +354,8 @@
       
       .quantity-control .btn {
         flex: 0 0 auto !important;
-        min-width: 38px !important;
+        min-width: 32px !important; /* Reduced from 38px to 32px */
+        height: 38px !important;
         padding: 0 !important;
         display: flex !important;
         align-items: center !important;
@@ -362,38 +363,27 @@
         z-index: 1 !important;
       }
 
-      /* Strong overrides for mobile devices */
-      @media (max-width: 768px) {
-        /* Force input groups to stay horizontal */
-        .input-group,
-        #cartItems .input-group {
-          display: flex !important;
-          flex-direction: row !important;
-          width: 100% !important;
-          flex-wrap: nowrap !important;
+      /* Make cart modal quantity controls even smaller */
+      #cartItems .quantity-control {
+        max-width: 110px !important;
+      }
+      
+      #cartItems .quantity-control .form-control {
+        width: 36px !important;
+      }
+      
+      #cartItems .quantity-control .btn {
+        min-width: 30px !important;
+      }
+      
+      /* Adjust product card layout for smaller screens */
+      @media (max-width: 430px) {
+        .card-footer {
+          padding: 0.75rem !important;
         }
         
-        .input-group > *,
-        #cartItems .input-group > * {
-          width: auto !important;
-          border-radius: 0 !important;
-          margin: 0 !important;
-        }
-        
-        .input-group .form-control,
-        #cartItems .input-group .form-control {
-          width: 50px !important;
-          flex-grow: 0 !important;
-        }
-        
-        /* Override any column direction for these specific screen sizes */
-        @media (width: 430px) and (height: 932px) {
-          .quantity-control,
-          .input-group {
-            display: flex !important;
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-          }
+        .quantity-control {
+          margin: 0 auto; /* Center the quantity control */
         }
       }
     </style>
