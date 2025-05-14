@@ -386,6 +386,88 @@
           margin: 0 auto; /* Center the quantity control */
         }
       }
+
+      /* Add these updated styles to improve quantity controls for very small screens */
+      @media (max-width: 320px) {
+        /* Product cards quantity controls */
+        .quantity-control {
+          display: flex !important;
+          justify-content: center !important;
+          max-width: 100% !important;
+        }
+        
+        .quantity-control .form-control {
+          width: 35px !important;
+          padding: 0 !important;
+        }
+        
+        .quantity-control .btn {
+          min-width: 30px !important;
+        }
+        
+        /* Make the Add to Cart button smaller text */
+        .btn-outline-dark {
+          font-size: 14px !important;
+          padding: 6px 8px !important;
+        }
+      }
+      
+      /* Specific override for the card layout structure */
+      @media (max-width: 400px) {
+        /* Reduce card padding */
+        .card-footer {
+          padding: 0.5rem !important;
+        }
+        
+        .product-card .card-body {
+          padding-bottom: 0.25rem !important;
+        }
+        
+        /* Center the controls better */
+        .card-footer .d-flex.flex-column {
+          gap: 0.5rem !important;
+        }
+        
+        /* Maximize space for the numerical input */
+        .quantity-control .form-control {
+          padding-left: 2px !important;
+          padding-right: 2px !important;
+        }
+        
+        /* Make add to cart button take up less vertical space */
+        .card-footer .btn.btn-outline-dark.mt-auto {
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+          margin-top: 4px !important;
+        }
+      }
+      
+      /* Alternative layout for very small screens */
+      @media (max-width: 375px) {
+        /* Change the layout of the product cards */
+        .renderProducts-card-template {
+          display: flex !important;
+          flex-direction: column !important;
+        }
+        
+        /* Update the renderProducts function to use a custom template */
+        #productContainer.extra-compact .card-footer {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 8px !important;
+        }
+        
+        #productContainer.extra-compact .quantity-control {
+          max-width: 90px !important;
+        }
+        
+        #productContainer.extra-compact .btn-outline-dark {
+          font-size: 12px !important;
+          padding: 4px 6px !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -588,27 +670,32 @@
         const paginated = products.slice(start, end);
         const container = document.getElementById("productContainer");
         container.innerHTML = "";
-
+        
+        const isExtraCompact = window.innerWidth <= 375;
+        
         paginated.forEach(p => {
-        const card = `
-            <div class="col mb-5">
-              <div class="card h-100">
-                <!-- Product image-->
-                <img class="card-img-top" src="${p.imgUrl}" alt="${p.name}" />
-                <!-- Product details-->
-                <div class="card-body p-4">
-                  <div class="text-center">
-                    <!-- Product name-->
-                    <h5 class="product-name fw-bolder" title="${p.name}">${p.name}</h5>
-                    <!-- Product price-->
-                    ${formatRupiah(p.price)}
+          let card;
+          
+          if (isExtraCompact) {
+            // Compact layout for very small screens
+            card = `
+              <div class="col mb-4">
+                <div class="card h-100">
+                  <!-- Product image-->
+                  <img class="card-img-top" src="${p.imgUrl}" alt="${p.name}" style="height: 140px;" />
+                  <!-- Product details-->
+                  <div class="card-body p-2">
+                    <div class="text-center">
+                      <!-- Product name-->
+                      <h5 class="product-name fw-bolder" title="${p.name}">${p.name}</h5>
+                      <!-- Product price-->
+                      ${formatRupiah(p.price)}
+                    </div>
                   </div>
-                </div>
-                <!-- Product actions-->
-                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                  <div class="d-flex flex-column gap-2">
-                    <div class="quantity-control input-group">
-                      <button class="btn btn-outline-dark" 
+                  <!-- Product actions-->
+                  <div class="card-footer p-2 border-top-0 bg-transparent d-flex justify-content-between align-items-center">
+                    <div class="quantity-control input-group" style="max-width: 90px;">
+                      <button class="btn btn-outline-dark btn-sm" 
                         onclick="changeQuantity('${p.id}', -1)" 
                         type="button">
                         <i class="bi bi-dash"></i>
@@ -621,25 +708,73 @@
                         inputmode="numeric"
                         pattern="[0-9]*"
                       />
-                      <button class="btn btn-outline-dark" 
+                      <button class="btn btn-outline-dark btn-sm" 
                         onclick="changeQuantity('${p.id}', 1)" 
                         type="button">
                         <i class="bi bi-plus"></i>
                       </button>
                     </div>
+                    <button class="btn btn-outline-dark btn-sm" 
+                      onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
+                      <i class="bi-cart-plus"></i> Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            // Original layout for larger screens
+            card = `
+              <div class="col mb-5">
+                <div class="card h-100">
+                  <!-- Product image-->
+                  <img class="card-img-top" src="${p.imgUrl}" alt="${p.name}" />
+                  <!-- Product details-->
+                  <div class="card-body p-4">
                     <div class="text-center">
-                      <button class="btn btn-outline-dark mt-auto" 
-                        onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')"
-                      >
-                        <i class="bi-cart-plus me-1"></i>
-                        Add to cart
-              </button>
+                      <!-- Product name-->
+                      <h5 class="product-name fw-bolder" title="${p.name}">${p.name}</h5>
+                      <!-- Product price-->
+                      ${formatRupiah(p.price)}
+                    </div>
+                  </div>
+                  <!-- Product actions-->
+                  <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                    <div class="d-flex flex-column gap-2">
+                      <div class="quantity-control input-group">
+                        <button class="btn btn-outline-dark" 
+                          onclick="changeQuantity('${p.id}', -1)" 
+                          type="button">
+                          <i class="bi bi-dash"></i>
+                        </button>
+                        <input type="number" 
+                          min="1" 
+                          value="1" 
+                          id="qty-${p.id}" 
+                          class="form-control" 
+                          inputmode="numeric"
+                          pattern="[0-9]*"
+                        />
+                        <button class="btn btn-outline-dark" 
+                          onclick="changeQuantity('${p.id}', 1)" 
+                          type="button">
+                          <i class="bi bi-plus"></i>
+                        </button>
+                      </div>
+                      <div class="text-center">
+                        <button class="btn btn-outline-dark mt-auto" 
+                          onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
+                          <i class="bi-cart-plus me-1"></i>
+                          Add to cart
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-            </div>
-          </div>
-        `;
+              </div>
+            `;
+          }
+          
           container.innerHTML += card;
         });
 
@@ -932,6 +1067,20 @@
         
         qtyInput.value = newValue;
       }
+
+      /* Add this function to your JavaScript */
+      function applySmallScreenLayout() {
+        const container = document.getElementById('productContainer');
+        if (window.innerWidth <= 375) {
+          container.classList.add('extra-compact');
+        } else {
+          container.classList.remove('extra-compact');
+        }
+      }
+      
+      // Call this on load and on resize
+      window.addEventListener('load', applySmallScreenLayout);
+      window.addEventListener('resize', applySmallScreenLayout);
     </script>
   </body>
 </html>
