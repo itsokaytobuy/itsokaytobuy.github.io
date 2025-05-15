@@ -213,13 +213,23 @@ function doGet(e) {
 
   // If action is present, handle API request
   const action = e.parameter.action;
+  const callback = e.parameter.callback || '';
 
   if (action === 'getProducts') {
-    return ContentService.createTextOutput(JSON.stringify(getProducts()))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader('Access-Control-Allow-Origin', '*')
-      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    const products = getProducts();
+    
+    if (callback) {
+      // Return JSONP response with callback
+      return ContentService.createTextOutput(`${callback}(${JSON.stringify(products)})`)
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    } else {
+      // Return standard JSON response
+      return ContentService.createTextOutput(JSON.stringify(products))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeader('Access-Control-Allow-Origin', '*')
+        .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    }
   }
   
   // Test API connectivity
@@ -227,15 +237,24 @@ function doGet(e) {
     // Ensure sheets exist during test
     ensureSheetsExist();
     
-    return ContentService.createTextOutput(JSON.stringify({
-      status: "success",
-      message: "API is working correctly",
-      timestamp: new Date().toISOString()
-    }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (callback) {
+      return ContentService.createTextOutput(callback + '(' + JSON.stringify({
+        status: "success",
+        message: "API is working correctly",
+        timestamp: new Date().toISOString()
+      }) + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        message: "API is working correctly",
+        timestamp: new Date().toISOString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader('Access-Control-Allow-Origin', '*')
+      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    }
   }
 
   // Fallback: serve API info
@@ -259,6 +278,7 @@ function doPost(e) {
     const customerAddress = e.parameter.customerAddress;
     const paymentMethod = e.parameter.paymentMethod;
     const cart = JSON.parse(e.parameter.cartData);
+    const redirectSuccess = e.parameter.redirectSuccess === 'true';
     
     // Generate IDs
     const customerId = generateUUID();
@@ -301,27 +321,52 @@ function doPost(e) {
     // Save order items
     saveOrderItems(orderItems);
 
-    // Return JSON response with CORS headers
-    return ContentService.createTextOutput(JSON.stringify({
+    const responseData = {
       success: true,
       orderId: orderId,
       total: total,
       paymentMethod: paymentMethod
-    }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    };
+
+    // If redirectSuccess parameter is true, return HTML
+    if (redirectSuccess) {
+      return HtmlService.createHtmlOutput(`
+        <html>
+          <body>
+            <pre>${JSON.stringify(responseData)}</pre>
+          </body>
+        </html>
+      `);
+    } else {
+      // Return JSON response with CORS headers
+      return ContentService.createTextOutput(JSON.stringify(responseData))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader('Access-Control-Allow-Origin', '*')
+      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    }
   } catch (err) {
     console.error("Error in doPost:", err);
-    return ContentService.createTextOutput(JSON.stringify({ 
+    const errorResponse = { 
       success: false, 
       error: err.message 
-    }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    };
+
+    if (e.parameter.redirectSuccess === 'true') {
+      return HtmlService.createHtmlOutput(`
+        <html>
+          <body>
+            <pre>${JSON.stringify(errorResponse)}</pre>
+          </body>
+        </html>
+      `);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify(errorResponse))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader('Access-Control-Allow-Origin', '*')
+      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    }
   }
 }
 
@@ -331,6 +376,6 @@ function doOptions(e) {
     .setMimeType(ContentService.MimeType.TEXT)
     .setHeader("Access-Control-Allow-Origin", "*")
     .setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-    .setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    .setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
     .setHeader("Access-Control-Max-Age", "3600");
 }
