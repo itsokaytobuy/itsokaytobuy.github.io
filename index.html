@@ -378,12 +378,24 @@
       
       /* Adjust product card layout for smaller screens */
       @media (max-width: 430px) {
-        .card-footer {
-          padding: 0.75rem !important;
+        /* Change the card-footer to use vertical stacking on mobile */
+        .card-footer.p-2.border-top-0.bg-transparent {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          gap: 8px !important;
         }
         
-        .quantity-control {
-          margin: 0 auto; /* Center the quantity control */
+        /* Center the quantity control */
+        .quantity-control.input-group {
+          margin: 0 auto !important;
+          max-width: 120px !important;
+        }
+        
+        /* Make the add button full width */
+        .card-footer .btn-outline-dark.btn-sm {
+          width: 100% !important;
+          margin-top: 4px !important;
         }
       }
 
@@ -442,30 +454,13 @@
         }
       }
       
-      /* Alternative layout for very small screens */
+      /* Update the compact layout for very small screens */
       @media (max-width: 375px) {
-        /* Change the layout of the product cards */
-        .renderProducts-card-template {
-          display: flex !important;
-          flex-direction: column !important;
-        }
-        
-        /* Update the renderProducts function to use a custom template */
         #productContainer.extra-compact .card-footer {
-          display: flex !important;
-          flex-direction: row !important;
+          flex-direction: column !important;
           align-items: center !important;
-          justify-content: space-between !important;
-          padding: 8px !important;
-        }
-        
-        #productContainer.extra-compact .quantity-control {
-          max-width: 90px !important;
-        }
-        
-        #productContainer.extra-compact .btn-outline-dark {
-          font-size: 12px !important;
-          padding: 4px 6px !important;
+          justify-content: center !important;
+          gap: 8px !important;
         }
       }
     </style>
@@ -693,7 +688,7 @@
                     </div>
                   </div>
                   <!-- Product actions-->
-                  <div class="card-footer p-2 border-top-0 bg-transparent d-flex justify-content-between align-items-center">
+                  <div class="card-footer p-2 border-top-0 bg-transparent">
                     <div class="quantity-control input-group" style="max-width: 90px;">
                       <button class="btn btn-outline-dark btn-sm" 
                         onclick="changeQuantity('${p.id}', -1)" 
@@ -714,9 +709,9 @@
                         <i class="bi bi-plus"></i>
                       </button>
                     </div>
-                    <button class="btn btn-outline-dark btn-sm" 
+                    <button class="btn btn-outline-dark btn-sm w-100" 
                       onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
-                      <i class="bi-cart-plus"></i> Add
+                      <i class="bi-cart-plus"></i> Add to cart
                     </button>
                   </div>
                 </div>
