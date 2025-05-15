@@ -895,7 +895,7 @@
       function clearCart() {
         cart = [];
         localStorage.removeItem("cart");
-        openCart();
+        updateCartCount();
       }
 
       function showToast(message) {
