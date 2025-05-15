@@ -351,7 +351,7 @@
   </head>
   <body>
     <!-- Navigation-->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container px-4 px-lg-5">
         <a class="navbar-brand" href="#">ItsOkaytoBuy</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
@@ -361,10 +361,10 @@
           <form class="d-flex ms-auto">
             <input class="form-control me-2" type="search" id="search" placeholder="Search products..." oninput="filterProducts()">
           </form>
-          <button class="btn btn-outline-dark ms-2" onclick="openCart()">
+          <button class="btn btn-light ms-2" onclick="openCart()">
             <i class="bi-cart-fill me-1"></i>
             Cart
-            <span class="badge bg-dark text-white ms-1 rounded-pill" id="cartCount">0</span>
+            <span class="badge bg-primary text-white ms-1 rounded-pill" id="cartCount">0</span>
           </button>
     </div>
       </div>
@@ -381,7 +381,7 @@
             placeholder="Search products..." 
             oninput="syncSearchFields(this.value)"
           >
-          <button type="button" class="btn btn-outline-dark" onclick="closeFloatingSearch()">
+          <button type="button" class="btn btn-outline-primary" onclick="closeFloatingSearch()">
             <i class="bi bi-x"></i>
           </button>
         </form>
@@ -389,7 +389,7 @@
     </div>
 
     <!-- Header-->
-    <header class="bg-dark py-5">
+    <header class="bg-primary py-5">
       <div class="container px-4 px-lg-5 my-5">
         <div class="text-center text-white">
           <h1 class="display-4 fw-bolder">Daftar Produk</h1>
@@ -458,7 +458,7 @@
 
     <!-- Toast Notification -->
     <div class="toast-container">
-      <div id="toast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+      <div id="toast" class="toast bg-primary text-white" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-body">
           <i class="bi bi-check-circle me-2"></i>
       <span id="toast-message">Item added to cart!</span>
@@ -469,12 +469,12 @@
     <div id="screen-flash" class="screen-flash"></div>
 
     <div class="floating-buttons d-md-none">
-      <button class="btn btn-brown rounded-circle" onclick="toggleSearchFocus()" title="Search Products">
+      <button class="btn btn-primary rounded-circle" onclick="toggleSearchFocus()" title="Search Products">
         <i class="bi bi-search fs-4"></i>
       </button>
-      <button class="btn btn-brown rounded-circle" onclick="openCart()" title="View Cart">
+      <button class="btn btn-primary rounded-circle" onclick="openCart()" title="View Cart">
         <i class="bi bi-cart fs-4"></i>
-        <span class="badge bg-danger text-white rounded-pill" id="floatingCartCount">0</span>
+        <span class="badge bg-primary text-white rounded-pill" id="floatingCartCount">0</span>
       </button>
     </div>
 
@@ -491,7 +491,7 @@
               <!-- Order Summary Column -->
               <div class="col-md-5 mb-4 mb-md-0">
                 <div class="card">
-                  <div class="card-header bg-dark text-white">
+                  <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Order Summary</h5>
                   </div>
                   <div class="card-body p-3">
@@ -581,19 +581,19 @@
     <div class="modal fade" id="orderConfirmationModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header bg-success text-white">
+          <div class="modal-header bg-primary text-white">
             <h5 class="modal-title">Order Confirmed!</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <div class="text-center mb-4">
-              <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+              <i class="bi bi-check-circle-fill text-primary" style="font-size: 4rem;"></i>
               <h4 class="mt-3">Thank You For Your Order</h4>
               <p class="text-muted">Your order has been received and is being processed.</p>
             </div>
             
             <div class="card mb-3">
-              <div class="card-header bg-light">
+              <div class="card-header bg-primary text-white">
                 Order Details
               </div>
               <div class="card-body">
@@ -618,7 +618,7 @@
     </div>
 
     <!-- Footer-->
-    <footer class="py-5 bg-dark">
+    <footer class="py-5 bg-primary">
       <div class="container"><p class="m-0 text-center text-white">Copyright &copy; ItsOkaytoBuy 2023-2025</p></div>
     </footer>
 
@@ -699,7 +699,7 @@
                   <!-- Product actions-->
                   <div class="card-footer p-2 border-top-0 bg-transparent">
                     <div class="quantity-control input-group" style="max-width: 90px;">
-                      <button class="btn btn-outline-dark btn-sm" 
+                      <button class="btn btn-outline-primary btn-sm" 
                         onclick="changeQuantity('${p.id}', -1)" 
                         type="button">
                         <i class="bi bi-dash"></i>
@@ -712,7 +712,7 @@
                         inputmode="numeric"
                         pattern="[0-9]*"
                       />
-                      <button class="btn btn-outline-dark btn-sm" 
+                      <button class="btn btn-outline-primary btn-sm" 
                         onclick="changeQuantity('${p.id}', 1)" 
                         type="button">
                         <i class="bi bi-plus"></i>
@@ -749,7 +749,7 @@
                   <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
                     <div class="d-flex flex-column gap-2">
                       <div class="quantity-control input-group">
-                        <button class="btn btn-outline-dark" 
+                        <button class="btn btn-outline-primary" 
                           onclick="changeQuantity('${p.id}', -1)" 
                           type="button">
                           <i class="bi bi-dash"></i>
@@ -762,7 +762,7 @@
                           inputmode="numeric"
                           pattern="[0-9]*"
                         />
-                        <button class="btn btn-outline-dark" 
+                        <button class="btn btn-outline-primary" 
                           onclick="changeQuantity('${p.id}', 1)" 
                           type="button">
                           <i class="bi bi-plus"></i>
@@ -1132,10 +1132,10 @@
         
         if (paymentMethod === 'bank_transfer') {
           paymentInstructions.innerHTML = `
-            <div class="alert alert-info mt-3">
+            <div class="alert alert-primary mt-3">
               <h5 class="mb-3">Bank Transfer Instructions:</h5>
               <p class="mb-2">Please transfer the down payment of <strong style="font-size: 1.1rem;">${formatRupiah(paidNow)}</strong> to:</p>
-              <div class="bg-white p-3 rounded border mb-3" style="user-select: text; -webkit-user-select: text;">
+              <div class="bg-light p-3 rounded border mb-3" style="user-select: text; -webkit-user-select: text;">
                 <p class="mb-2"><strong>Bank:</strong> BANK JAGO</p>
                 <p class="mb-2"><strong>Account Number:</strong> <span style="font-size: 1.2rem; font-weight: 600;">105801321294</span></p>
                 <p class="mb-0"><strong>Account Name:</strong> <span style="font-size: 1.1rem;">Galuh Ajeng Prabeswari</span></p>
