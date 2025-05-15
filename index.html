@@ -89,8 +89,8 @@
 
         .card-text {
           font-size: 0.875rem;
-          margin-bottom: 0.5rem;
-        }
+        margin-bottom: 0.5rem;
+      }
 
         /* Make inputs and buttons more touch-friendly */
         input[type="number"],
@@ -146,8 +146,8 @@
         .pagination .page-link {
           min-width: 44px;
           min-height: 44px;
-          display: flex;
-          align-items: center;
+        display: flex;
+        align-items: center;
           justify-content: center;
         }
 
@@ -308,7 +308,7 @@
         left: 0;
         width: 100%;
         background-color: rgba(255, 255, 255, 0.95);
-        padding: 1rem;
+          padding: 1rem;
         z-index: 1040;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         transform: translateY(-100%);
@@ -320,7 +320,7 @@
       }
 
       .floating-search-form {
-        display: flex;
+          display: flex;
         width: 100%;
       }
 
@@ -491,7 +491,7 @@
         
         /* Add a little space between quantity control and add button */
         .card-footer .d-flex.flex-column .text-center {
-          width: 100%;
+        width: 100%;
           margin-top: 0.5rem;
         }
         
@@ -584,7 +584,7 @@
             Cart
             <span class="badge bg-dark text-white ms-1 rounded-pill" id="cartCount">0</span>
           </button>
-        </div>
+    </div>
       </div>
     </nav>
 
@@ -612,7 +612,7 @@
         <div class="text-center text-white">
           <h1 class="display-4 fw-bolder">Daftar Produk</h1>
           <p class="lead fw-normal text-white-50 mb-0">Find what you love</p>
-        </div>
+    </div>
       </div>
     </header>
     <!-- Section-->
@@ -689,7 +689,7 @@
     <!-- Checkout Modal -->
     <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
+      <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="checkoutModalLabel">Checkout</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCheckout()"></button>
@@ -721,7 +721,7 @@
               
               <!-- Customer Info Column -->
               <div class="col-md-7">
-                <form id="checkoutForm">
+        <form id="checkoutForm">
                   <h5 class="mb-3">Customer Information</h5>
                   <div class="mb-3">
                     <label for="custName" class="form-label">Full Name</label>
@@ -763,8 +763,8 @@
                     <button type="submit" class="btn btn-primary" id="submitOrderBtn">
                       <i class="bi bi-receipt me-1"></i> Submit Order
                     </button>
-                  </div>
-                </form>
+          </div>
+        </form>
               </div>
             </div>
           </div>
@@ -862,7 +862,7 @@
         container.innerHTML = "";
         
         const isExtraCompact = window.innerWidth <= 375;
-        
+
         paginated.forEach(p => {
           let card;
           
@@ -872,7 +872,11 @@
               <div class="col mb-4">
                 <div class="card h-100">
                   <!-- Product image-->
-                  <img class="card-img-top" src="${p.imgUrl}" alt="${p.name}" style="height: 140px;" />
+                  <img class="card-img-top" 
+                       src="${p.imgUrl || 'https://placehold.co/200x200?text=No+Image'}" 
+                       alt="${p.name}" 
+                       style="height: 140px;" 
+                       onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=Error';" />
                   <!-- Product details-->
                   <div class="card-body p-2">
                     <div class="text-center">
@@ -902,23 +906,26 @@
                         onclick="changeQuantity('${p.id}', 1)" 
                         type="button">
                         <i class="bi bi-plus"></i>
-                      </button>
+              </button>
                     </div>
                     <button class="btn btn-outline-dark btn-sm w-100" 
                       onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
                       <i class="bi-cart-plus"></i> Add to cart
                     </button>
                   </div>
-                </div>
-              </div>
-            `;
+            </div>
+          </div>
+        `;
           } else {
             // Original layout for larger screens
             card = `
               <div class="col mb-5">
                 <div class="card h-100">
                   <!-- Product image-->
-                  <img class="card-img-top" src="${p.imgUrl}" alt="${p.name}" />
+                  <img class="card-img-top" 
+                       src="${p.imgUrl || 'https://placehold.co/200x200?text=No+Image'}" 
+                       alt="${p.name}" 
+                       onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=Error';" />
                   <!-- Product details-->
                   <div class="card-body p-4">
                     <div class="text-center">
@@ -1052,7 +1059,7 @@
                   <div class="fw-bold">
                     ${formatRupiah(itemTotal)}
                   </div>
-                </div>
+              </div>
             </div>
           `;
         });
@@ -1181,9 +1188,9 @@
       function handleProductsResponse(products) {
         sessionStorage.setItem(CACHE_KEY, JSON.stringify(products));
         sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-        allProducts = products;
-        filteredProducts = allProducts;
-        renderProducts(filteredProducts);
+            allProducts = products;
+            filteredProducts = allProducts;
+            renderProducts(filteredProducts);
       }
 
       // Add checkout form submission handler:
@@ -1246,7 +1253,7 @@
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalBtnText;
             
-            if (data.success) {
+        if (data.success) {
               // Close checkout modal
               checkoutModal.hide();
               
@@ -1254,8 +1261,8 @@
               showOrderConfirmation(data.orderId, data.total, paymentMethod);
               
               // Clear the cart
-              clearCart();
-            } else {
+          clearCart();
+        } else {
               console.error('Error:', data.error);
               alert('Order failed: ' + (data.error || 'Unknown error'));
             }

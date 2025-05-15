@@ -60,6 +60,16 @@ function getProducts() {
     const descIndex = header.indexOf("desc");
     const activeIndex = header.indexOf("active");
     
+    // Log the column indexes for debugging
+    console.log("Column indexes:", {
+      id: idIndex,
+      name: nameIndex,
+      price: priceIndex,
+      imgUrl: imgUrlIndex,
+      desc: descIndex,
+      active: activeIndex
+    });
+    
     // Make sure all required columns exist
     if (idIndex === -1 || nameIndex === -1 || priceIndex === -1) {
       console.error("Required columns missing in Products sheet");
@@ -72,16 +82,27 @@ function getProducts() {
       
       // Check if product is active (if column exists)
       let isActive = true;
+      
       if (activeIndex !== -1) {
         const activeValue = row[activeIndex];
-        isActive = (activeValue === true || 
-                   activeValue === "true" || 
-                   activeValue === "yes" || 
-                   activeValue === "YES" || 
-                   activeValue === "True" || 
-                   activeValue === "Y" || 
-                   activeValue === 1);
+        console.log(`Row ${i} active value:`, activeValue, typeof activeValue);
+        
+        // Check for various forms of "true" values
+        if (activeValue === false || 
+            activeValue === "false" || 
+            activeValue === "no" || 
+            activeValue === "NO" || 
+            activeValue === "False" || 
+            activeValue === "N" || 
+            activeValue === 0 || 
+            activeValue === "" || 
+            activeValue === null || 
+            activeValue === undefined) {
+          isActive = false;
+        }
       }
+      
+      console.log(`Product ${row[nameIndex]} isActive:`, isActive);
       
       // Only include active products
       if (isActive) {
@@ -92,18 +113,19 @@ function getProducts() {
         };
         
         // Add optional fields if they exist
-        if (imgUrlIndex !== -1 && row[imgUrlIndex]) {
-          product.imgUrl = formatImageUrl(row[imgUrlIndex]);
+        if (imgUrlIndex !== -1) {
+          product.imgUrl = formatImageUrl(row[imgUrlIndex] || "");
         }
         
-        if (descIndex !== -1 && row[descIndex]) {
-          product.desc = row[descIndex];
+        if (descIndex !== -1) {
+          product.desc = row[descIndex] || "";
         }
         
         products.push(product);
       }
     }
     
+    console.log("Returning products:", products.length);
     return products;
   } catch (error) {
     console.error("Error getting products:", error);
@@ -111,9 +133,18 @@ function getProducts() {
   }
 }
 
-// Format image URL for Google Drive links
+// Format image URL function that works with any image URL
 function formatImageUrl(url) {
-  if (!url) return "";
+  // Check if URL is empty or undefined
+  if (!url || url.trim() === "") {
+    // Return a default placeholder image
+    return "https://placehold.co/200x200?text=No+Image";
+  }
+  
+  // Log the original URL for debugging
+  console.log("Processing image URL:", url);
+  
+  // Special handling for Google Drive URLs (if you ever use them again)
   if (url.includes("drive.google.com")) {
     const match = url.match(/[-\w]{25,}/);
     if (match) {
@@ -121,6 +152,14 @@ function formatImageUrl(url) {
       return `https://drive.google.com/uc?export=view&id=${fileId}`;
     }
   }
+  
+  // If URL doesn't start with http:// or https://, assume it's a relative path
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    // Add a default prefix (replace with your own base URL if needed)
+    // return 'https://your-domain.com/' + url;
+  }
+  
+  // Return the URL as is
   return url;
 }
 
