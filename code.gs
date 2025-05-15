@@ -317,15 +317,17 @@ function doPost(e) {
     const customerAddress = e.parameter.customerAddress;
     const paymentMethod = e.parameter.paymentMethod;
     const cart = JSON.parse(e.parameter.cartData);
+    const total = parseFloat(e.parameter.total) || 0;
+    const downPayment = parseFloat(e.parameter.downPayment) || 0;
+    const uniqueCode = parseInt(e.parameter.uniqueCode) || 0;
     const redirectSuccess = e.parameter.redirectSuccess === 'true';
     
     // Generate IDs
     const customerId = generateUUID();
     const orderId = generateUUID();
     
-    // Calculate total
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const dp = total / 2; // Down payment is half of total
+    // Use provided total or calculate it
+    const calculatedTotal = total || cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const date = new Date();
     
     // Save customer data
@@ -337,14 +339,14 @@ function doPost(e) {
       customerAddress
     );
     
-    // Save order data
+    // Save order data with the provided down payment
     saveOrder(
       customerId,
       orderId,
       date,
-      total,
+      calculatedTotal,
       "Pending",
-      dp,
+      downPayment, // Use the paidNow amount as the down payment
       paymentMethod
     );
     
@@ -363,7 +365,9 @@ function doPost(e) {
     const responseData = {
       success: true,
       orderId: orderId,
-      total: total,
+      total: calculatedTotal,
+      downPayment: downPayment,
+      uniqueCode: uniqueCode,
       paymentMethod: paymentMethod
     };
 

@@ -707,13 +707,25 @@
                       <!-- Items will be inserted here dynamically -->
                     </div>
                     <hr>
-                    <div class="d-flex justify-content-between align-items-center fw-bold">
+                    <div class="d-flex justify-content-between align-items-center">
                       <span>Total:</span>
                       <span id="checkoutTotal"></span>
                     </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                      <span>Down Payment:</span>
+                      <span id="checkoutDownPayment"></span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                      <span>Unique code:</span>
+                      <span id="checkoutUniqueCode"></span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center fw-bold mt-2">
+                      <span>Paid Now:</span>
+                      <span id="checkoutPaidNow"></span>
+                    </div>
                     <div class="d-flex justify-content-between align-items-center text-muted small mt-2">
                       <span>Shipping:</span>
-                      <span>Will be calculated</span>
+                      <span>To be calculated later</span>
                     </div>
                   </div>
                 </div>
@@ -803,7 +815,7 @@
             </div>
             
             <div class="text-center">
-              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="closeCart()">
                 Continue Shopping
               </button>
             </div>
@@ -827,6 +839,11 @@
       const productsPerPage = 16;
       let filteredProducts = [];
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      
+      // Add these variables at the top of your script section
+      let uniqueCode = 0;
+      let downPayment = 0;
+      let paidNow = 0;
       
       document.addEventListener('DOMContentLoaded', function() {
         if (typeof bootstrap === 'undefined') {
@@ -1134,6 +1151,9 @@
       function updateCheckoutSummary() {
         const checkoutItems = document.getElementById('checkoutItems');
         const checkoutTotal = document.getElementById('checkoutTotal');
+        const checkoutDownPayment = document.getElementById('checkoutDownPayment');
+        const checkoutUniqueCode = document.getElementById('checkoutUniqueCode');
+        const checkoutPaidNow = document.getElementById('checkoutPaidNow');
         
         checkoutItems.innerHTML = '';
         
@@ -1154,7 +1174,19 @@
           `;
         });
         
+        // Generate a random 3-digit unique code between 1-500
+        uniqueCode = Math.floor(Math.random() * 500) + 1;
+        
+        // Calculate down payment (50% of total)
+        downPayment = Math.round(total / 2);
+        
+        // Calculate amount to be paid now (down payment + unique code)
+        paidNow = downPayment + uniqueCode;
+        
         checkoutTotal.textContent = formatRupiah(total);
+        checkoutDownPayment.textContent = formatRupiah(downPayment);
+        checkoutUniqueCode.textContent = formatRupiah(uniqueCode);
+        checkoutPaidNow.textContent = formatRupiah(paidNow);
       }
 
       function closeCheckout() {
@@ -1193,7 +1225,7 @@
             renderProducts(filteredProducts);
       }
 
-      // Add checkout form submission handler:
+      // Update the checkout form submission handler
       document.getElementById('checkoutForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -1205,6 +1237,9 @@
         
         const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
         
+        // Calculate total
+        const total = calculateCartTotal();
+        
         // Prepare the order data
         const orderData = {
           customerName: document.getElementById('custName').value,
@@ -1212,13 +1247,16 @@
           customerPhone: document.getElementById('custPhone').value,
           customerAddress: document.getElementById('custAddress').value,
           paymentMethod: paymentMethod,
-          cartItems: cart
+          cartItems: cart,
+          total: total,
+          downPayment: paidNow, // Send the paid now amount as down payment
+          uniqueCode: uniqueCode
         };
         
         // Show the submission is in progress
         showToast("Submitting your order...");
         
-        // Use fetch with form-urlencoded data instead of iframe
+        // Use fetch with form-urlencoded data
         const formData = new URLSearchParams();
         formData.append('customerName', orderData.customerName);
         formData.append('customerEmail', orderData.customerEmail);
@@ -1226,6 +1264,9 @@
         formData.append('customerAddress', orderData.customerAddress);
         formData.append('paymentMethod', orderData.paymentMethod);
         formData.append('cartData', JSON.stringify(orderData.cartItems));
+        formData.append('total', orderData.total);
+        formData.append('downPayment', orderData.downPayment);
+        formData.append('uniqueCode', orderData.uniqueCode);
         
         fetch(SCRIPT_URL, {
           method: 'POST',
@@ -1241,9 +1282,8 @@
           checkoutModal.hide();
           
           // Show confirmation with order details
-          const calculatedTotal = calculateCartTotal();
           const generatedOrderId = 'ORD-' + Date.now().toString().slice(-6);
-          showOrderConfirmation(generatedOrderId, calculatedTotal, paymentMethod);
+          showOrderConfirmation(generatedOrderId, total, paymentMethod);
           
           // Clear the cart
           clearCart();
@@ -1262,7 +1302,7 @@
         // Set order details in confirmation modal
         document.getElementById('confirmOrderId').textContent = orderId || 'Generated on server';
         document.getElementById('confirmOrderDate').textContent = new Date().toLocaleString();
-        document.getElementById('confirmOrderTotal').textContent = formatRupiah(total || calculateCartTotal());
+        document.getElementById('confirmOrderTotal').textContent = formatRupiah(total);
         
         // Set payment instructions based on payment method
         const paymentInstructions = document.getElementById('paymentInstructions');
@@ -1271,7 +1311,7 @@
           paymentInstructions.innerHTML = `
             <div class="alert alert-info mt-3">
               <h6>Bank Transfer Instructions:</h6>
-              <p class="small mb-1">Please transfer the payment to:</p>
+              <p class="small mb-1">Please transfer the down payment of <strong>${formatRupiah(paidNow)}</strong> to:</p>
               <p class="small mb-1"><strong>Bank:</strong> BCA</p>
               <p class="small mb-1"><strong>Account Number:</strong> 1234567890</p>
               <p class="small mb-1"><strong>Account Name:</strong> ItsOkaytoBuy</p>
@@ -1282,7 +1322,7 @@
           paymentInstructions.innerHTML = `
             <div class="alert alert-info mt-3">
               <h6>Cash on Delivery:</h6>
-              <p class="small mb-0">Please prepare the exact amount when our courier arrives. We'll contact you to confirm delivery details.</p>
+              <p class="small mb-0">Please prepare the down payment amount of <strong>${formatRupiah(paidNow)}</strong> when our courier arrives. We'll contact you to confirm delivery details.</p>
             </div>
           `;
         }
