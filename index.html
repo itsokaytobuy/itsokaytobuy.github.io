@@ -656,6 +656,9 @@
           window.orderConfirmationModal = orderConfirmationModal;
           window.toast = toast;
           updateCartCount();
+          
+          // Load products
+          loadProducts();
         }
       });
 
@@ -1133,45 +1136,102 @@
 
       // Add this function to your JavaScript to ensure modals are properly closed before opening new ones
       function openModal(modalToOpen) {
-        // In Bootstrap 5, _isShown is deprecated, use proper checking method
-        // Close all other modals first
+        // In Bootstrap 5, handle modal transitions more carefully
+        
+        // Close all other modals first with proper transitions
         if (window.cartModal) {
           const cartModalElement = document.getElementById('cartModal');
-          const cartModalInstance = bootstrap.Modal.getInstance(cartModalElement);
-          if (cartModalInstance) {
-            cartModalInstance.hide();
+          if (cartModalElement.classList.contains('show')) {
+            cartModal.hide();
           }
         }
         
         if (window.checkoutModal) {
           const checkoutModalElement = document.getElementById('checkoutModal');
-          const checkoutModalInstance = bootstrap.Modal.getInstance(checkoutModalElement);
-          if (checkoutModalInstance) {
-            checkoutModalInstance.hide();
+          if (checkoutModalElement.classList.contains('show')) {
+            checkoutModal.hide();
           }
         }
         
         if (window.orderConfirmationModal) {
           const orderConfirmationModalElement = document.getElementById('orderConfirmationModal');
-          const orderConfirmationModalInstance = bootstrap.Modal.getInstance(orderConfirmationModalElement);
-          if (orderConfirmationModalInstance) {
-            orderConfirmationModalInstance.hide();
+          if (orderConfirmationModalElement.classList.contains('show')) {
+            orderConfirmationModal.hide();
           }
-        }
-        
-        // Add event listeners to ensure modals are fully hidden before showing the new one
-        const modalBackdrops = document.querySelectorAll('.modal-backdrop');
-        if (modalBackdrops.length > 0) {
-          // Remove any existing modal backdrops
-          modalBackdrops.forEach(backdrop => {
-            backdrop.remove();
-          });
         }
         
         // Open the requested modal after a short delay to ensure smooth transitions
         setTimeout(() => {
           modalToOpen.show();
         }, 200);
+      }
+
+      // Let's also check if the product loading code is still intact
+      // Add this to your code to help debugging
+      function filterProducts() {
+        const keyword = document.getElementById("search").value.toLowerCase();
+        filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes(keyword));
+        currentPage = 1;
+        renderProducts(filteredProducts);
+      }
+
+      // Make sure this JSONP callback function is defined properly
+      function handleProductsResponse(products) {
+        console.log("Products loaded:", products.length);
+        
+        if (products && Array.isArray(products)) {
+          sessionStorage.setItem(CACHE_KEY, JSON.stringify(products));
+          sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+          allProducts = products;
+          filteredProducts = allProducts;
+          renderProducts(filteredProducts);
+        } else {
+          console.error("Invalid product data received:", products);
+          document.getElementById("productContainer").innerHTML = 
+            '<div class="alert alert-danger w-100">Failed to load products. Please refresh the page.</div>';
+        }
+      }
+
+      // Check the SCRIPT_URL to make sure it's correct and add an error handler
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyavb_FgAhAgAT8enSue64A4mPRv2in0yIxaoIAfRTaum5eLc--BmXjbGW3CWbvdg3q/exec';
+
+      // Add this function to check for cached products and load them if available
+      function loadProducts() {
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY);
+        const urlParams = new URLSearchParams(window.location.search);
+        const noCache = urlParams.get('nocache') === '1';
+
+        console.log("Loading products. Cached data available:", !!cached);
+
+        if (!noCache && cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_EXPIRY_MS) {
+          try {
+          allProducts = JSON.parse(cached);
+          filteredProducts = allProducts;
+          renderProducts(filteredProducts);
+            console.log("Loaded", allProducts.length, "products from cache");
+          } catch (error) {
+            console.error("Error loading cached products:", error);
+            fetchProductsFromServer();
+          }
+        } else {
+          fetchProductsFromServer();
+        }
+      }
+
+      // Add this function to fetch products
+      function fetchProductsFromServer() {
+        console.log("Fetching products from server");
+        
+        // Create a JSONP request by dynamically adding a script tag
+        const script = document.createElement('script');
+        script.src = `${SCRIPT_URL}?action=getProducts&callback=handleProductsResponse`;
+        script.onerror = function() {
+          console.error("Failed to load products script");
+          document.getElementById("productContainer").innerHTML = 
+            '<div class="alert alert-danger w-100">Failed to load products. Please refresh the page.</div>';
+        };
+        document.body.appendChild(script);
       }
     </script>
   </body>
