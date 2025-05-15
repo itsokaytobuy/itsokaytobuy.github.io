@@ -932,13 +932,16 @@
         const checkoutUniqueCode = document.getElementById('checkoutUniqueCode');
         const checkoutPaidNow = document.getElementById('checkoutPaidNow');
         
+        // Clear existing content
         checkoutItems.innerHTML = '';
         
         let total = 0;
         
-        // Add some CSS to ensure consistent alignment
-        checkoutItems.innerHTML = `
-          <style>
+        // Add CSS styles directly to the head once to avoid duplication
+        if (!document.getElementById('checkout-styles')) {
+          const styleEl = document.createElement('style');
+          styleEl.id = 'checkout-styles';
+          styleEl.textContent = `
             .checkout-item {
               display: flex;
               justify-content: space-between;
@@ -957,9 +960,24 @@
               color: #6c757d;
               font-size: 0.875rem;
             }
-          </style>
-        `;
+            .summary-row {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 8px;
+            }
+            .summary-value {
+              text-align: right;
+              min-width: 100px;
+              font-weight: 500;
+            }
+            .summary-total {
+              font-weight: 700;
+            }
+          `;
+          document.head.appendChild(styleEl);
+        }
         
+        // Fill the items
         cart.forEach(item => {
           const itemTotal = item.price * item.quantity;
           total += itemTotal;
@@ -984,38 +1002,34 @@
         // Calculate amount to be paid now (down payment + unique code)
         paidNow = downPayment + uniqueCode;
         
-        // Also add consistent styling to the summary section
-        const summaryStyle = `
-          <style>
-            .summary-row {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 8px;
-            }
-            .summary-value {
-              text-align: right;
-              min-width: 100px;
-              font-weight: 500;
-            }
-            .summary-total {
-              font-weight: 700;
-            }
-          </style>
-        `;
-        
-        checkoutTotal.innerHTML = summaryStyle + formatRupiah(total);
+        // Update the summary fields
+        checkoutTotal.innerHTML = formatRupiah(total);
         checkoutDownPayment.innerHTML = formatRupiah(downPayment);
         checkoutUniqueCode.innerHTML = formatRupiah(uniqueCode);
         checkoutPaidNow.innerHTML = formatRupiah(paidNow);
         
-        // Update the summary section divs to use consistent styling
-        document.querySelectorAll('.d-flex.justify-content-between.align-items-center').forEach(div => {
-          div.classList.add('summary-row');
-          div.querySelector('span:last-child').classList.add('summary-value');
-        });
+        // Update the structure of the summary section for better alignment
+        const summarySection = checkoutTotal.closest('.card-body');
+        const summaryRows = summarySection.querySelectorAll('.d-flex.justify-content-between.align-items-center');
         
-        // Add extra emphasis to the "Paid Now" value
-        document.querySelector('.fw-bold.mt-2').classList.add('summary-total');
+        // Add the summary-row class to each row if it exists
+        if (summaryRows && summaryRows.length > 0) {
+          summaryRows.forEach(row => {
+            row.classList.add('summary-row');
+            const valueSpan = row.querySelector('span:last-child');
+            if (valueSpan) {
+              valueSpan.classList.add('summary-value');
+            }
+          });
+          
+          // Find the 'paid now' row
+          const paidNowRow = Array.from(summaryRows).find(row => 
+            row.textContent.toLowerCase().includes('paid now'));
+          
+          if (paidNowRow) {
+            paidNowRow.classList.add('summary-total');
+          }
+        }
       }
 
       function closeCheckout() {
