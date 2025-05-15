@@ -1164,7 +1164,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const noCache = urlParams.get('nocache') === '1';
 
-      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwmBMvBfMVMQ6lhd6h2iNpeSkVsjCzyqTwkWJqtUPReNDjPM0lUqQRZkvixQp6IDB1Lqw/exec';
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyavb_FgAhAgAT8enSue64A4mPRv2in0yIxaoIAfRTaum5eLc--BmXjbGW3CWbvdg3q/exec';
 
         if (!noCache && cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_EXPIRY_MS) {
           allProducts = JSON.parse(cached);
