@@ -741,7 +741,9 @@
                   </div>
                   <div class="mb-3">
                     <label for="custPhone" class="form-label">WhatsApp Number</label>
-                    <input type="tel" id="custPhone" class="form-control" placeholder="e.g. 081234567890" required pattern="[0-9]+" title="Please enter a valid phone number (numbers only)">
+                    <input type="tel" id="custPhone" class="form-control" placeholder="e.g. 81234567890 (without leading 0)" 
+                      required pattern="[0-9]+" title="Please enter a valid phone number (numbers only)">
+                    <div class="form-text small">Country code +62 will be added automatically</div>
                   </div>
                   <div class="mb-3">
                     <label for="custEmail" class="form-label">Email (optional)</label>
@@ -751,19 +753,18 @@
                     <label for="custAddress" class="form-label">Shipping Address</label>
                     <textarea id="custAddress" class="form-control" placeholder="Full delivery address" required rows="3"></textarea>
                   </div>
-                  
-                  <h5 class="mb-3 mt-4">Payment Method</h5>
                   <div class="mb-3">
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="paymentMethod" id="bankTransfer" value="bank_transfer" checked>
-                      <label class="form-check-label" for="bankTransfer">
-                        Bank Transfer
+                    <label class="form-label">Shipping Option</label>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="shippingOption" id="shippingJNT" value="J&T" checked>
+                      <label class="form-check-label" for="shippingJNT">
+                        J&T
                       </label>
                     </div>
                     <div class="form-check">
-                      <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod">
-                      <label class="form-check-label" for="cod">
-                        Cash on Delivery (COD)
+                      <input class="form-check-input" type="radio" name="shippingOption" id="shippingShopee" value="Shopee">
+                      <label class="form-check-label" for="shippingShopee">
+                        Shopee free ongkir <span class="text-muted">(admin 12% calculated later)</span>
                       </label>
                     </div>
                   </div>
@@ -1229,27 +1230,36 @@
       document.getElementById('checkoutForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // Get and format the phone number with country code
+        let phoneNumber = document.getElementById('custPhone').value.replace(/[^0-9]/g, '');
+        if (phoneNumber.startsWith('0')) {
+          phoneNumber = phoneNumber.substring(1);
+        }
+        phoneNumber = '+62' + phoneNumber;
+        
         // Disable the submit button and show loading state
         const submitBtn = document.getElementById('submitOrderBtn');
         const originalBtnText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
         
-        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-        
         // Calculate total
         const total = calculateCartTotal();
+        
+        // Get the selected shipping option
+        const shippingOption = document.querySelector('input[name="shippingOption"]:checked').value;
         
         // Prepare the order data
         const orderData = {
           customerName: document.getElementById('custName').value,
           customerEmail: document.getElementById('custEmail').value,
-          customerPhone: document.getElementById('custPhone').value,
+          customerPhone: phoneNumber, // Use the formatted phone number with country code
           customerAddress: document.getElementById('custAddress').value,
-          paymentMethod: paymentMethod,
+          paymentMethod: 'bank_transfer',
+          shippingOption: shippingOption,
           cartItems: cart,
           total: total,
-          downPayment: paidNow, // Send the paid now amount as down payment
+          downPayment: paidNow,
           uniqueCode: uniqueCode
         };
         
@@ -1263,6 +1273,7 @@
         formData.append('customerPhone', orderData.customerPhone);
         formData.append('customerAddress', orderData.customerAddress);
         formData.append('paymentMethod', orderData.paymentMethod);
+        formData.append('shippingOption', orderData.shippingOption);
         formData.append('cartData', JSON.stringify(orderData.cartItems));
         formData.append('total', orderData.total);
         formData.append('downPayment', orderData.downPayment);
@@ -1283,7 +1294,7 @@
           
           // Show confirmation with order details
           const generatedOrderId = 'ORD-' + Date.now().toString().slice(-6);
-          showOrderConfirmation(generatedOrderId, total, paymentMethod);
+          showOrderConfirmation(generatedOrderId, total, 'bank_transfer', shippingOption);
           
           // Clear the cart
           clearCart();
@@ -1298,11 +1309,14 @@
         });
       });
 
-      function showOrderConfirmation(orderId, total, paymentMethod) {
+      function showOrderConfirmation(orderId, total, paymentMethod, shippingOption) {
         // Set order details in confirmation modal
         document.getElementById('confirmOrderId').textContent = orderId || 'Generated on server';
         document.getElementById('confirmOrderDate').textContent = new Date().toLocaleString();
         document.getElementById('confirmOrderTotal').textContent = formatRupiah(total);
+        
+        // Get customer name for WhatsApp message
+        const customerName = document.getElementById('custName').value;
         
         // Set payment instructions based on payment method
         const paymentInstructions = document.getElementById('paymentInstructions');
@@ -1310,12 +1324,20 @@
         if (paymentMethod === 'bank_transfer') {
           paymentInstructions.innerHTML = `
             <div class="alert alert-info mt-3">
-              <h6>Bank Transfer Instructions:</h6>
-              <p class="small mb-1">Please transfer the down payment of <strong>${formatRupiah(paidNow)}</strong> to:</p>
-              <p class="small mb-1"><strong>Bank:</strong> BCA</p>
-              <p class="small mb-1"><strong>Account Number:</strong> 1234567890</p>
-              <p class="small mb-1"><strong>Account Name:</strong> ItsOkaytoBuy</p>
-              <p class="small mb-0">Please send the payment confirmation to our WhatsApp: +6281234567890</p>
+              <h5 class="mb-3">Bank Transfer Instructions:</h5>
+              <p class="mb-2">Please transfer the down payment of <strong style="font-size: 1.1rem;">${formatRupiah(paidNow)}</strong> to:</p>
+              <div class="bg-white p-3 rounded border mb-3" style="user-select: text; -webkit-user-select: text;">
+                <p class="mb-2"><strong>Bank:</strong> BCA</p>
+                <p class="mb-2"><strong>Account Number:</strong> <span style="font-size: 1.2rem; font-weight: 600;">1234567890</span></p>
+                <p class="mb-0"><strong>Account Name:</strong> <span style="font-size: 1.1rem;">ItsOkaytoBuy</span></p>
+              </div>
+              <p class="mb-1">Shipping Option: <strong>${shippingOption}</strong></p>
+              <p class="mb-2">Please send the payment confirmation to our WhatsApp:</p>
+              <a href="https://wa.me/+6285878024607?text=${encodeURIComponent(`Hai kak, order saya ${customerName} nomor ${orderId}, sudah dibayar ya, berikut bukti transfernya`)}" 
+                class="btn btn-success btn-lg w-100" 
+                target="_blank">
+                <i class="bi bi-whatsapp me-2"></i> Send Payment Confirmation
+              </a>
             </div>
           `;
         } else if (paymentMethod === 'cod') {
@@ -1336,10 +1358,18 @@
         return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
       }
 
-      // Add this function to validate phone number as the user types
+      // Update the phone number input and handling
       document.getElementById('custPhone').addEventListener('input', function(e) {
         // Remove any non-numeric characters
-        this.value = this.value.replace(/[^0-9]/g, '');
+        let value = this.value.replace(/[^0-9]/g, '');
+        
+        // If the user manually entered a leading zero, remove it before applying the +62
+        if (value.startsWith('0')) {
+          value = value.substring(1);
+        }
+        
+        // Show the number in the input without country code for better editing
+        this.value = value;
       });
 
       // Add custom Bootstrap theme color
