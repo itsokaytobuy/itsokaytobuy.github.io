@@ -25,7 +25,7 @@ function ensureSheetsExist() {
   // Check for Orders sheet
   if (!ss.getSheetByName("Orders")) {
     const ordersSheet = ss.insertSheet("Orders");
-    ordersSheet.appendRow(["orderId", "customerId", "date", "total", "status", "downPayment", "paymentMethod"]);
+    ordersSheet.appendRow(["orderId", "customerId", "date", "total", "status", "downPayment", "paymentMethod", "shippingOption"]);
   }
   
   // Check for OrderItems sheet
@@ -192,7 +192,7 @@ function saveCustomer(customerId, name, email, phone, address) {
 }
 
 // Save order data to spreadsheet
-function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMethod) {
+function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMethod, shippingOption) {
   try {
     // Ensure sheets exist
     ensureSheetsExist();
@@ -205,7 +205,8 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
       total,
       status,
       dp,
-      paymentMethod
+      paymentMethod,
+      shippingOption
     ]);
     
     return true;
@@ -316,6 +317,7 @@ function doPost(e) {
     const customerPhone = e.parameter.customerPhone;
     const customerAddress = e.parameter.customerAddress;
     const paymentMethod = e.parameter.paymentMethod;
+    const shippingOption = e.parameter.shippingOption || "Standard"; // Get shipping option with default
     const cart = JSON.parse(e.parameter.cartData);
     const total = parseFloat(e.parameter.total) || 0;
     const downPayment = parseFloat(e.parameter.downPayment) || 0;
@@ -339,15 +341,16 @@ function doPost(e) {
       customerAddress
     );
     
-    // Save order data with the provided down payment
+    // Save order data with the provided down payment and shipping option
     saveOrder(
       customerId,
       orderId,
       date,
       calculatedTotal,
       "Pending",
-      downPayment, // Use the paidNow amount as the down payment
-      paymentMethod
+      downPayment,
+      paymentMethod,
+      shippingOption // Add shipping option
     );
     
     // Prepare order items
