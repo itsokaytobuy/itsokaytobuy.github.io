@@ -125,7 +125,7 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       }
       
-      .floating-buttons .badge {
+      .floating-buttons .btn:last-child .badge {
         position: absolute;
         top: 0;
         right: 0;
@@ -333,6 +333,20 @@
       #paymentInstructions .bg-white {
         background-color: var(--bs-body-bg) !important;
       }
+
+      /* Alternative approach */
+      #floatingCartCount {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(25%, -25%);
+        font-size: 0.7rem;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     </style>
   </head>
   <body>
@@ -393,14 +407,24 @@
         <div class="d-flex justify-content-center mt-4">
           <nav aria-label="Product navigation">
             <ul class="pagination">
-              <li class="page-item">
-                <button class="page-link" onclick="changePage(-1)">Previous</button>
+              <li class="page-item" id="prevPageItem">
+                <button class="page-link rounded-start" onclick="changePage(-1)">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
               </li>
-              <li class="page-item">
-                <span class="page-link" id="pageInfo">Page 1 of 1</span>
+              <li class="page-item active" id="currentPageItem">
+                <span class="page-link" id="currentPage">1</span>
               </li>
-              <li class="page-item">
-                <button class="page-link" onclick="changePage(1)">Next</button>
+              <li class="page-item disabled">
+                <span class="page-link">of</span>
+              </li>
+              <li class="page-item" id="totalPagesItem">
+                <span class="page-link" id="totalPages">1</span>
+              </li>
+              <li class="page-item" id="nextPageItem">
+                <button class="page-link rounded-end" onclick="changePage(1)">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
               </li>
             </ul>
           </nav>
@@ -656,7 +680,7 @@
             // Compact layout for very small screens
             card = `
               <div class="col mb-4">
-                <div class="card h-100">
+                <div class="card h-100 border-primary">
                   <!-- Product image-->
                   <img class="card-img-top" 
                        src="${p.imgUrl || 'https://placehold.co/200x200?text=No+Image'}" 
@@ -694,7 +718,7 @@
                         <i class="bi bi-plus"></i>
               </button>
                     </div>
-                    <button class="btn btn-outline-dark btn-sm w-100" 
+                    <button class="btn btn-primary btn-sm w-100" 
                       onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
                       <i class="bi-cart-plus"></i> Add to cart
                     </button>
@@ -706,7 +730,7 @@
             // Original layout for larger screens
             card = `
               <div class="col mb-5">
-                <div class="card h-100">
+                <div class="card h-100 border-primary">
                   <!-- Product image-->
                   <img class="card-img-top" 
                        src="${p.imgUrl || 'https://placehold.co/200x200?text=No+Image'}" 
@@ -745,7 +769,7 @@
                         </button>
                       </div>
                       <div class="text-center">
-                        <button class="btn btn-outline-dark mt-auto" 
+                        <button class="btn btn-primary mt-auto" 
                           onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
                           <i class="bi-cart-plus me-1"></i>
                           Add to cart
@@ -761,7 +785,13 @@
           container.innerHTML += card;
         });
 
-        document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${Math.ceil(products.length / productsPerPage)}`;
+        const totalPages = Math.ceil(products.length / productsPerPage);
+        document.getElementById("currentPage").innerText = currentPage;
+        document.getElementById("totalPages").innerText = totalPages;
+        
+        // Update the previous/next buttons' disabled state
+        document.getElementById("prevPageItem").classList.toggle("disabled", currentPage <= 1);
+        document.getElementById("nextPageItem").classList.toggle("disabled", currentPage >= totalPages);
       }
 
       function filterProducts() {
@@ -773,9 +803,14 @@
 
       function changePage(direction) {
         const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-        currentPage += direction;
-        if (currentPage < 1) currentPage = 1;
-        if (currentPage > totalPages) currentPage = totalPages;
+        const newPage = currentPage + direction;
+        
+        // Prevent navigation beyond the first or last page
+        if (newPage < 1 || newPage > totalPages) {
+          return;
+        }
+        
+        currentPage = newPage;
         renderProducts(filteredProducts);
       }
 
