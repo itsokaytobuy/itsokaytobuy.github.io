@@ -1197,34 +1197,27 @@
         
         const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
         
-        const payload = {
-          customer: {
-            name: document.getElementById('custName').value,
-            email: document.getElementById('custEmail').value,
-            phone: document.getElementById('custPhone').value,
-            address: document.getElementById('custAddress').value
-          },
-          payment: {
-            method: paymentMethod
-          },
-          cart: cart
-        };
-        
         fetch(SCRIPT_URL, {
-          redirect: 'follow',
           method: 'POST',
           headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body: JSON.stringify(payload)
+          body: new URLSearchParams({
+            customerName: document.getElementById('custName').value,
+            customerEmail: document.getElementById('custEmail').value,
+            customerPhone: document.getElementById('custPhone').value,
+            customerAddress: document.getElementById('custAddress').value,
+            paymentMethod: paymentMethod,
+            cartData: JSON.stringify(cart)
+          }).toString()
         })
         .then(response => response.json())
-      .then(data => {
-        // Re-enable the submit button
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnText;
-        
-        if (data.success) {
+        .then(data => {
+          // Re-enable the submit button
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+          
+          if (data.success) {
             // Close checkout modal
             checkoutModal.hide();
             
@@ -1233,7 +1226,7 @@
             
             // Clear the cart
             clearCart();
-        } else {
+          } else {
             console.error('Error:', data.error);
             alert('Order failed: ' + data.error);
           }

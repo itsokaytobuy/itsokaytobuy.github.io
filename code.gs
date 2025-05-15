@@ -1,5 +1,5 @@
 // Spreadsheet ID - REPLACE WITH YOUR SPREADSHEET ID
-const SPREADSHEET_ID = "your-spreadsheet-id-here"; // Get this from the URL of your spreadsheet
+const SPREADSHEET_ID = "1s3M5Rg5XZ5jL93VtvbMcD9_Q8ApQrOx5t0kZlgZaG98"; // Get this from the URL of your spreadsheet
 
 // Get spreadsheet reference
 function getSpreadsheet() {
@@ -252,11 +252,14 @@ function doGet(e) {
 // Handle POST requests
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
-    const customer = data.customer;
-    const cart = data.cart;
-    const payment = data.payment || { method: 'bank_transfer' };
-
+    // Parse the cart data from the form parameters
+    const customerName = e.parameter.customerName;
+    const customerEmail = e.parameter.customerEmail;
+    const customerPhone = e.parameter.customerPhone;
+    const customerAddress = e.parameter.customerAddress;
+    const paymentMethod = e.parameter.paymentMethod;
+    const cart = JSON.parse(e.parameter.cartData);
+    
     // Generate IDs
     const customerId = generateUUID();
     const orderId = generateUUID();
@@ -269,10 +272,10 @@ function doPost(e) {
     // Save customer data
     saveCustomer(
       customerId,
-      customer.name,
-      customer.email,
-      customer.phone,
-      customer.address
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerAddress
     );
     
     // Save order data
@@ -283,7 +286,7 @@ function doPost(e) {
       total,
       "Pending",
       dp,
-      payment.method
+      paymentMethod
     );
     
     // Prepare order items
@@ -303,7 +306,7 @@ function doPost(e) {
       success: true,
       orderId: orderId,
       total: total,
-      paymentMethod: payment.method
+      paymentMethod: paymentMethod
     }))
     .setMimeType(ContentService.MimeType.JSON)
     .setHeader('Access-Control-Allow-Origin', '*')
