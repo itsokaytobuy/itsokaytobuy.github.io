@@ -170,20 +170,19 @@ function generateUUID() {
 
 // Generate a consistent customer ID primarily from phone number
 function generateCustomerId(name, phone) {
-  // Clean the phone number by removing everything except digits
+  // Clean the phone number and name
   const cleanPhone = phone.replace(/[^0-9]/g, '');
+  const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
   
-  // If phone is empty or invalid, fall back to using name+phone
-  if (!cleanPhone || cleanPhone.length < 6) {
-    // Clean name and use name+phone combo as before
-    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const shortPhone = cleanPhone.slice(-6);
-    return `cust-${cleanName.slice(0, 10)}-${shortPhone}`;
-  }
+  // Always include both name and phone for better readability and identification
+  // Take the first 10 characters of the name (or less if the name is shorter)
+  const namePrefix = cleanName.slice(0, 10);
   
-  // Use phone number as the primary identifier
-  // This assumes the phone number is unique to a single customer/household
-  return `cust-phone-${cleanPhone.slice(-10)}`;
+  // Take the last 6 digits of the phone
+  const phoneSuffix = cleanPhone.slice(-6);
+  
+  // Combine them
+  return `cust-${namePrefix}-${phoneSuffix}`;
 }
 
 // Find existing customer or create a new one
