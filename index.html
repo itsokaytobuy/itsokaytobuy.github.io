@@ -936,17 +936,41 @@
         
         let total = 0;
         
+        // Add some CSS to ensure consistent alignment
+        checkoutItems.innerHTML = `
+          <style>
+            .checkout-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 12px;
+            }
+            .checkout-item-details {
+              flex: 1;
+            }
+            .checkout-item-price {
+              text-align: right;
+              min-width: 100px;
+              font-weight: 500;
+            }
+            .checkout-item-quantity {
+              color: #6c757d;
+              font-size: 0.875rem;
+            }
+          </style>
+        `;
+        
         cart.forEach(item => {
           const itemTotal = item.price * item.quantity;
           total += itemTotal;
           
           checkoutItems.innerHTML += `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <div>
-                <span class="fw-bold">${item.name}</span>
-                <div class="text-muted small">${item.quantity} × ${formatRupiah(item.price)}</div>
+            <div class="checkout-item">
+              <div class="checkout-item-details">
+                <div class="fw-bold">${item.name}</div>
+                <div class="checkout-item-quantity">${item.quantity} × ${formatRupiah(item.price)}</div>
               </div>
-              <span>${formatRupiah(itemTotal)}</span>
+              <div class="checkout-item-price">${formatRupiah(itemTotal)}</div>
             </div>
           `;
         });
@@ -960,10 +984,38 @@
         // Calculate amount to be paid now (down payment + unique code)
         paidNow = downPayment + uniqueCode;
         
-        checkoutTotal.textContent = formatRupiah(total);
-        checkoutDownPayment.textContent = formatRupiah(downPayment);
-        checkoutUniqueCode.textContent = formatRupiah(uniqueCode);
-        checkoutPaidNow.textContent = formatRupiah(paidNow);
+        // Also add consistent styling to the summary section
+        const summaryStyle = `
+          <style>
+            .summary-row {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 8px;
+            }
+            .summary-value {
+              text-align: right;
+              min-width: 100px;
+              font-weight: 500;
+            }
+            .summary-total {
+              font-weight: 700;
+            }
+          </style>
+        `;
+        
+        checkoutTotal.innerHTML = summaryStyle + formatRupiah(total);
+        checkoutDownPayment.innerHTML = formatRupiah(downPayment);
+        checkoutUniqueCode.innerHTML = formatRupiah(uniqueCode);
+        checkoutPaidNow.innerHTML = formatRupiah(paidNow);
+        
+        // Update the summary section divs to use consistent styling
+        document.querySelectorAll('.d-flex.justify-content-between.align-items-center').forEach(div => {
+          div.classList.add('summary-row');
+          div.querySelector('span:last-child').classList.add('summary-value');
+        });
+        
+        // Add extra emphasis to the "Paid Now" value
+        document.querySelector('.fw-bold.mt-2').classList.add('summary-total');
       }
 
       function closeCheckout() {
