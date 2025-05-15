@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Its Okay to Buy - Shop Homepage</title>
+    <title>ItsOkaytoBuy - Shop Homepage</title>
     <!-- Bootstrap icons-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
     <!-- Core theme CSS (includes Bootstrap)-->
@@ -571,7 +571,7 @@
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container px-4 px-lg-5">
-        <a class="navbar-brand" href="#">Its Okay to Buy</a>
+        <a class="navbar-brand" href="#">ItsOkaytoBuy</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -688,32 +688,125 @@
 
     <!-- Checkout Modal -->
     <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="checkoutModalLabel">Checkout</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCheckout()"></button>
           </div>
           <div class="modal-body">
-        <form id="checkoutForm">
-              <div class="mb-3">
-                <input type="text" id="custName" class="form-control" placeholder="Name" required>
+            <div class="row">
+              <!-- Order Summary Column -->
+              <div class="col-md-5 mb-4 mb-md-0">
+                <div class="card">
+                  <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                  </div>
+                  <div class="card-body p-3">
+                    <div id="checkoutItems" class="mb-3">
+                      <!-- Items will be inserted here dynamically -->
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center fw-bold">
+                      <span>Total:</span>
+                      <span id="checkoutTotal"></span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-muted small mt-2">
+                      <span>Shipping:</span>
+                      <span>Will be calculated</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="mb-3">
-                <input type="number" id="custPhone" class="form-control" placeholder="WhatsApp Number" required>
+              
+              <!-- Customer Info Column -->
+              <div class="col-md-7">
+                <form id="checkoutForm">
+                  <h5 class="mb-3">Customer Information</h5>
+                  <div class="mb-3">
+                    <label for="custName" class="form-label">Full Name</label>
+                    <input type="text" id="custName" class="form-control" placeholder="Your full name" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="custPhone" class="form-label">WhatsApp Number</label>
+                    <input type="tel" id="custPhone" class="form-control" placeholder="e.g. 081234567890" required pattern="[0-9]+" title="Please enter a valid phone number (numbers only)">
+                  </div>
+                  <div class="mb-3">
+                    <label for="custEmail" class="form-label">Email (optional)</label>
+                    <input type="email" id="custEmail" class="form-control" placeholder="your@email.com">
+                  </div>
+                  <div class="mb-3">
+                    <label for="custAddress" class="form-label">Shipping Address</label>
+                    <textarea id="custAddress" class="form-control" placeholder="Full delivery address" required rows="3"></textarea>
+                  </div>
+                  
+                  <h5 class="mb-3 mt-4">Payment Method</h5>
+                  <div class="mb-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="paymentMethod" id="bankTransfer" value="bank_transfer" checked>
+                      <label class="form-check-label" for="bankTransfer">
+                        Bank Transfer
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod">
+                      <label class="form-check-label" for="cod">
+                        Cash on Delivery (COD)
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div class="text-end mt-4">
+                    <button type="button" class="btn btn-outline-secondary me-2" onclick="closeCheckout()">
+                      Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitOrderBtn">
+                      <i class="bi bi-receipt me-1"></i> Submit Order
+                    </button>
+                  </div>
+                </form>
               </div>
-              <div class="mb-3">
-                <input type="email" id="custEmail" class="form-control" placeholder="Email">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add an Order Confirmation Modal -->
+    <div class="modal fade" id="orderConfirmationModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">Order Confirmed!</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-4">
+              <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+              <h4 class="mt-3">Thank You For Your Order</h4>
+              <p class="text-muted">Your order has been received and is being processed.</p>
+            </div>
+            
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                Order Details
               </div>
-              <div class="mb-3">
-                <textarea id="custAddress" class="form-control" placeholder="Shipping Address" required rows="3"></textarea>
+              <div class="card-body">
+                <p class="mb-1"><strong>Order ID:</strong> <span id="confirmOrderId">--</span></p>
+                <p class="mb-1"><strong>Date:</strong> <span id="confirmOrderDate">--</span></p>
+                <p class="mb-3"><strong>Total:</strong> <span id="confirmOrderTotal">--</span></p>
+                
+                <div id="paymentInstructions">
+                  <!-- Payment instructions will be added here dynamically -->
+                </div>
               </div>
-              <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                  <i class="bi bi-receipt"></i> Submit Order
-                </button>
-              </div>
-            </form>
+            </div>
+            
+            <div class="text-center">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                Continue Shopping
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -721,7 +814,7 @@
 
     <!-- Footer-->
     <footer class="py-5 bg-dark">
-      <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Its Okay to Buy 2024</p></div>
+      <div class="container"><p class="m-0 text-center text-white">Copyright &copy; ItsOkaytoBuy 2023-2025</p></div>
     </footer>
 
     <!-- Bootstrap core JS-->
@@ -1023,7 +1116,38 @@
 
       function checkoutCart() {
         cartModal.hide();
+        
+        // Populate the checkout items and total
+        updateCheckoutSummary();
+        
+        // Show the checkout modal
         checkoutModal.show();
+      }
+
+      function updateCheckoutSummary() {
+        const checkoutItems = document.getElementById('checkoutItems');
+        const checkoutTotal = document.getElementById('checkoutTotal');
+        
+        checkoutItems.innerHTML = '';
+        
+        let total = 0;
+        
+        cart.forEach(item => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+          
+          checkoutItems.innerHTML += `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div>
+                <span class="fw-bold">${item.name}</span>
+                <div class="text-muted small">${item.quantity} × ${formatRupiah(item.price)}</div>
+              </div>
+              <span>${formatRupiah(itemTotal)}</span>
+            </div>
+          `;
+        });
+        
+        checkoutTotal.textContent = formatRupiah(total);
       }
 
       function closeCheckout() {
@@ -1065,12 +1189,23 @@
       document.getElementById('checkoutForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // Disable the submit button and show loading state
+        const submitBtn = document.getElementById('submitOrderBtn');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+        
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        
         const payload = {
           customer: {
             name: document.getElementById('custName').value,
             email: document.getElementById('custEmail').value,
             phone: document.getElementById('custPhone').value,
             address: document.getElementById('custAddress').value
+          },
+          payment: {
+            method: paymentMethod
           },
           cart: cart
         };
@@ -1084,19 +1219,76 @@
     })
         .then(response => response.json())
       .then(data => {
+        // Re-enable the submit button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        
         if (data.success) {
-            alert('Order submitted! Thank you.');
-            window.checkoutModal.hide();
-          clearCart();
+            // Close checkout modal
+            checkoutModal.hide();
+            
+            // Show confirmation with order details
+            showOrderConfirmation(data.orderId, data.total, paymentMethod);
+            
+            // Clear the cart
+            clearCart();
         } else {
             console.error('Error:', data.error);
             alert('Order failed: ' + data.error);
           }
         })
         .catch(error => {
+          // Re-enable the submit button
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+          
           console.error('Request failed:', error);
           alert('Failed to submit order. Try again later.');
         });
+      });
+
+      function showOrderConfirmation(orderId, total, paymentMethod) {
+        // Set order details in confirmation modal
+        document.getElementById('confirmOrderId').textContent = orderId || 'Generated on server';
+        document.getElementById('confirmOrderDate').textContent = new Date().toLocaleString();
+        document.getElementById('confirmOrderTotal').textContent = formatRupiah(total || calculateCartTotal());
+        
+        // Set payment instructions based on payment method
+        const paymentInstructions = document.getElementById('paymentInstructions');
+        
+        if (paymentMethod === 'bank_transfer') {
+          paymentInstructions.innerHTML = `
+            <div class="alert alert-info mt-3">
+              <h6>Bank Transfer Instructions:</h6>
+              <p class="small mb-1">Please transfer the payment to:</p>
+              <p class="small mb-1"><strong>Bank:</strong> BCA</p>
+              <p class="small mb-1"><strong>Account Number:</strong> 1234567890</p>
+              <p class="small mb-1"><strong>Account Name:</strong> ItsOkaytoBuy</p>
+              <p class="small mb-0">Please send the payment confirmation to our WhatsApp: +6281234567890</p>
+            </div>
+          `;
+        } else if (paymentMethod === 'cod') {
+          paymentInstructions.innerHTML = `
+            <div class="alert alert-info mt-3">
+              <h6>Cash on Delivery:</h6>
+              <p class="small mb-0">Please prepare the exact amount when our courier arrives. We'll contact you to confirm delivery details.</p>
+            </div>
+          `;
+        }
+        
+        // Initialize and show the confirmation modal
+        const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
+        orderConfirmationModal.show();
+      }
+
+      function calculateCartTotal() {
+        return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+      }
+
+      // Add this function to validate phone number as the user types
+      document.getElementById('custPhone').addEventListener('input', function(e) {
+        // Remove any non-numeric characters
+        this.value = this.value.replace(/[^0-9]/g, '');
       });
 
       // Add custom Bootstrap theme color

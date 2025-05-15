@@ -59,6 +59,7 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     const customer = data.customer;
     const cart = data.cart;
+    const payment = data.payment || { method: 'bank_transfer' };
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const ordersSheet = ss.getSheetByName("Orders");
@@ -78,13 +79,15 @@ function doPost(e) {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const dp = total / 2;
     const date = new Date();
+    
     ordersSheet.appendRow([
       orderId,
       customerId,
       date,
       total,
       "Pending",
-      dp
+      dp,
+      payment.method
     ]);
 
     cart.forEach(item => {
@@ -98,12 +101,20 @@ function doPost(e) {
       ]);
     });
 
-    // Return JSON response with CORS headers
-    return ContentService.createTextOutput(JSON.stringify({ success: true }))
-      .setMimeType(ContentService.MimeType.JSON);
+    // Return JSON response with order details for confirmation
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      orderId: orderId,
+      total: total,
+      paymentMethod: payment.method
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({ 
+      success: false, 
+      error: err.message 
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
