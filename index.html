@@ -320,6 +320,29 @@
       #paymentInstructions .bg-white {
         background-color: var(--bs-body-bg) !important;
       }
+      
+      /* Add these rules to your existing style section */
+      .selectable {
+        user-select: all !important;
+        -webkit-user-select: all !important;
+        -moz-user-select: all !important;
+        cursor: text;
+      }
+      
+      /* Fix the body overflow issue that can occur with multiple modals */
+      body.modal-open {
+        overflow: hidden !important;
+        padding-right: 0 !important;
+      }
+      
+      /* Ensure modals don't stack */
+      .modal {
+        z-index: 1050 !important;
+      }
+      
+      .modal-backdrop {
+        z-index: 1040 !important;
+      }
     </style>
   </head>
   <body>
@@ -992,10 +1015,10 @@
             <div class="alert alert-primary mt-3">
               <h5 class="mb-3">Bank Transfer Instructions:</h5>
               <p class="mb-2">Please transfer the down payment of <strong style="font-size: 1.1rem;">${formatRupiah(paidNow)}</strong> to:</p>
-              <div class="bg-light p-3 rounded border mb-3" style="user-select: text; -webkit-user-select: text;">
-                <p class="mb-2"><strong>Bank:</strong> BANK JAGO</p>
-                <p class="mb-2"><strong>Account Number:</strong> <span style="font-size: 1.2rem; font-weight: 600;">105801321294</span></p>
-                <p class="mb-0"><strong>Account Name:</strong> <span style="font-size: 1.1rem;">Galuh Ajeng Prabeswari</span></p>
+              <div class="bg-light p-3 rounded border mb-3" style="user-select: all; -webkit-user-select: all;">
+                <p class="mb-2 selectable"><strong>Bank:</strong> BANK JAGO</p>
+                <p class="mb-2 selectable"><strong>Account Number:</strong> <span style="font-size: 1.2rem; font-weight: 600;">105801321294</span></p>
+                <p class="mb-0 selectable"><strong>Account Name:</strong> <span style="font-size: 1.1rem;">Galuh Ajeng Prabeswari</span></p>
               </div>
               <p class="mb-1">Shipping Option: <strong>${shippingOption}</strong></p>
               <p class="mb-2">Please send the payment confirmation to our WhatsApp:</p>
@@ -1110,23 +1133,45 @@
 
       // Add this function to your JavaScript to ensure modals are properly closed before opening new ones
       function openModal(modalToOpen) {
+        // In Bootstrap 5, _isShown is deprecated, use proper checking method
         // Close all other modals first
-        if (window.cartModal && cartModal._isShown) {
-          cartModal.hide();
+        if (window.cartModal) {
+          const cartModalElement = document.getElementById('cartModal');
+          const cartModalInstance = bootstrap.Modal.getInstance(cartModalElement);
+          if (cartModalInstance) {
+            cartModalInstance.hide();
+          }
         }
         
-        if (window.checkoutModal && checkoutModal._isShown) {
-          checkoutModal.hide();
+        if (window.checkoutModal) {
+          const checkoutModalElement = document.getElementById('checkoutModal');
+          const checkoutModalInstance = bootstrap.Modal.getInstance(checkoutModalElement);
+          if (checkoutModalInstance) {
+            checkoutModalInstance.hide();
+          }
         }
         
-        if (window.orderConfirmationModal && orderConfirmationModal._isShown) {
-          orderConfirmationModal.hide();
+        if (window.orderConfirmationModal) {
+          const orderConfirmationModalElement = document.getElementById('orderConfirmationModal');
+          const orderConfirmationModalInstance = bootstrap.Modal.getInstance(orderConfirmationModalElement);
+          if (orderConfirmationModalInstance) {
+            orderConfirmationModalInstance.hide();
+          }
+        }
+        
+        // Add event listeners to ensure modals are fully hidden before showing the new one
+        const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+        if (modalBackdrops.length > 0) {
+          // Remove any existing modal backdrops
+          modalBackdrops.forEach(backdrop => {
+            backdrop.remove();
+          });
         }
         
         // Open the requested modal after a short delay to ensure smooth transitions
         setTimeout(() => {
           modalToOpen.show();
-        }, 150);
+        }, 200);
       }
     </script>
   </body>
