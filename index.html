@@ -1246,6 +1246,9 @@
         // Calculate total
         const total = calculateCartTotal();
         
+        // Generate the order ID here so we can use it in both places
+        const generatedOrderId = 'ORD-' + Date.now().toString().slice(-6);
+        
         // Get the selected shipping option
         const shippingOption = document.querySelector('input[name="shippingOption"]:checked').value;
         
@@ -1260,7 +1263,8 @@
           cartItems: cart,
           total: total,
           downPayment: paidNow,
-          uniqueCode: uniqueCode
+          uniqueCode: uniqueCode,
+          orderId: generatedOrderId // Add the order ID to the data
         };
         
         // Show the submission is in progress
@@ -1278,6 +1282,7 @@
         formData.append('total', orderData.total);
         formData.append('downPayment', orderData.downPayment);
         formData.append('uniqueCode', orderData.uniqueCode);
+        formData.append('orderId', generatedOrderId); // Pass the order ID to the backend
         
         fetch(SCRIPT_URL, {
           method: 'POST',
@@ -1292,8 +1297,7 @@
           // Close checkout modal
           checkoutModal.hide();
           
-          // Show confirmation with order details
-          const generatedOrderId = 'ORD-' + Date.now().toString().slice(-6);
+          // Use the same order ID for the confirmation
           showOrderConfirmation(generatedOrderId, total, 'bank_transfer', shippingOption);
           
           // Clear the cart
@@ -1333,7 +1337,7 @@
               </div>
               <p class="mb-1">Shipping Option: <strong>${shippingOption}</strong></p>
               <p class="mb-2">Please send the payment confirmation to our WhatsApp:</p>
-              <a href="https://wa.me/+6285878024607?text=${encodeURIComponent(`Hai kak, order saya ${customerName} nomor ${orderId}, sudah dibayar ya, berikut bukti transfernya`)}" 
+              <a href="https://wa.me/+6285878024607?text=${encodeURIComponent(`Hai kak, order saya ${customerName} nomor ${orderId} sudah dibayar ya, berikut bukti transfernya`)}" 
                 class="btn btn-success btn-lg w-100" 
                 target="_blank">
                 <i class="bi bi-whatsapp me-2"></i> Send Payment Confirmation

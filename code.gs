@@ -168,25 +168,119 @@ function generateUUID() {
   return Utilities.getUuid();
 }
 
-// Save customer data to spreadsheet
-function saveCustomer(customerId, name, email, phone, address) {
+// Generate a consistent customer ID primarily from phone number
+function generateCustomerId(name, phone) {
+  // Clean the phone number by removing everything except digits
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  
+  // If phone is empty or invalid, fall back to using name+phone
+  if (!cleanPhone || cleanPhone.length < 6) {
+    // Clean name and use name+phone combo as before
+    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const shortPhone = cleanPhone.slice(-6);
+    return `cust-${cleanName.slice(0, 10)}-${shortPhone}`;
+  }
+  
+  // Use phone number as the primary identifier
+  // This assumes the phone number is unique to a single customer/household
+  return `cust-phone-${cleanPhone.slice(-10)}`;
+}
+
+// Find existing customer or create a new one
+function findOrCreateCustomer(customerId, name, email, phone, address) {
   try {
     // Ensure sheets exist
     ensureSheetsExist();
     
     const sheet = getSpreadsheet().getSheetByName("Customers");
-    sheet.appendRow([
-      customerId,
-      name,
-      email,
-      phone,
-      address,
-      new Date() // Add timestamp
-    ]);
+    const data = sheet.getDataRange().getValues();
     
-    return true;
+    // Check if header row exists
+    if (data.length < 1) {
+      // Add header row if sheet is empty
+      sheet.appendRow(["customerId", "name", "email", "phone", "address", "date"]);
+    }
+    
+    const header = data[0];
+    const customerIdIndex = header.indexOf("customerId");
+    const phoneIndex = header.indexOf("phone");
+    
+    // Make sure required columns exist
+    if (customerIdIndex === -1) {
+      throw new Error("customerId column not found in Customers sheet");
+    }
+    
+    let customerRowIndex = -1;
+    
+    // Find the customer row if it exists
+    for (let i = 1; i < data.length; i++) {
+      // First try to match by customerId
+      if (data[i][customerIdIndex] === customerId) {
+        customerRowIndex = i + 1; // +1 because sheet rows are 1-indexed
+        break;
+      }
+      
+      // If phone column exists and we have a phone number, also try to match by phone
+      if (phoneIndex !== -1 && phone && data[i][phoneIndex]) {
+        // Clean both phone numbers for comparison
+        const cleanStoredPhone = String(data[i][phoneIndex]).replace(/[^0-9]/g, '');
+        const cleanInputPhone = phone.replace(/[^0-9]/g, '');
+        
+        // If last 10 digits match, it's likely the same customer
+        if (cleanStoredPhone.slice(-10) === cleanInputPhone.slice(-10)) {
+          customerRowIndex = i + 1;
+          break;
+        }
+      }
+    }
+    
+    if (customerRowIndex > 0) {
+      // Customer exists, update the date and other info
+      sheet.getRange(customerRowIndex, 6).setValue(new Date()); // Date
+      
+      // Also update the other fields
+      sheet.getRange(customerRowIndex, 2).setValue(name); // Name
+      sheet.getRange(customerRowIndex, 3).setValue(email); // Email
+      sheet.getRange(customerRowIndex, 4).setValue(phone); // Phone
+      sheet.getRange(customerRowIndex, 5).setValue(address); // Address
+      
+      // If we found by phone but customerId is different, update it to be consistent
+      if (data[customerRowIndex-1][customerIdIndex] !== customerId) {
+        sheet.getRange(customerRowIndex, 1).setValue(customerId);
+      }
+      
+      return true;
+    } else {
+      // Customer doesn't exist, create new
+      sheet.appendRow([
+        customerId,
+        name,
+        email,
+        phone,
+        address,
+        new Date() // Add timestamp
+      ]);
+      
+      return false;
+    }
   } catch (error) {
-    console.error("Error saving customer:", error);
+    console.error("Error finding/creating customer:", error);
+    
+    // Fallback to just creating a new customer entry
+    try {
+      const sheet = getSpreadsheet().getSheetByName("Customers");
+      sheet.appendRow([
+        customerId,
+        name,
+        email,
+        phone,
+        address,
+        new Date() // Add timestamp
+      ]);
+    } catch (fallbackError) {
+      console.error("Error in fallback customer creation:", fallbackError);
+    }
+    
     return false;
   }
 }
@@ -216,8 +310,8 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
   }
 }
 
-// Save order items to spreadsheet
-function saveOrderItems(orderItems) {
+// Updated code to generate order item IDs that incorporate the order ID
+function saveOrderItems(orderItems, orderId) {
   try {
     // Ensure sheets exist
     ensureSheetsExist();
@@ -225,10 +319,13 @@ function saveOrderItems(orderItems) {
     const sheet = getSpreadsheet().getSheetByName("OrderItems");
     
     // Add each order item as a new row
-    orderItems.forEach(item => {
+    orderItems.forEach((item, index) => {
+      // Create a simpler order item ID that includes the order ID
+      const orderItemId = `${orderId}-item-${index + 1}`;
+      
       sheet.appendRow([
-        item.orderItemId,
-        item.orderId,
+        orderItemId,
+        orderId,
         item.productId,
         item.quantity,
         item.price
@@ -311,35 +408,37 @@ function doGet(e) {
 // Handle POST requests
 function doPost(e) {
   try {
-    // Parse the cart data from the form parameters
+    // Parse the form parameters
     const customerName = e.parameter.customerName;
     const customerEmail = e.parameter.customerEmail;
     const customerPhone = e.parameter.customerPhone;
     const customerAddress = e.parameter.customerAddress;
     const paymentMethod = e.parameter.paymentMethod;
-    const shippingOption = e.parameter.shippingOption || "Standard"; // Get shipping option with default
+    const shippingOption = e.parameter.shippingOption || "Standard";
     const cart = JSON.parse(e.parameter.cartData);
     const total = parseFloat(e.parameter.total) || 0;
     const downPayment = parseFloat(e.parameter.downPayment) || 0;
     const uniqueCode = parseInt(e.parameter.uniqueCode) || 0;
     const redirectSuccess = e.parameter.redirectSuccess === 'true';
     
-    // Generate IDs
-    const customerId = generateUUID();
-    const orderId = generateUUID();
+    // Use the order ID from the frontend or generate a fallback if missing
+    const orderId = e.parameter.orderId || ('ORD-' + new Date().getTime().toString().slice(-6));
     
-    // Use provided total or calculate it
-    const calculatedTotal = total || cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const date = new Date();
+    // Generate a customer ID based on name and phone
+    const customerId = generateCustomerId(customerName, customerPhone);
     
-    // Save customer data
-    saveCustomer(
+    // Check if customer already exists and update or create accordingly
+    const customerExists = findOrCreateCustomer(
       customerId,
       customerName,
       customerEmail,
       customerPhone,
       customerAddress
     );
+    
+    // Use provided total or calculate it
+    const calculatedTotal = total || cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const date = new Date();
     
     // Save order data with the provided down payment and shipping option
     saveOrder(
@@ -350,20 +449,18 @@ function doPost(e) {
       "Pending",
       downPayment,
       paymentMethod,
-      shippingOption // Add shipping option
+      shippingOption
     );
     
-    // Prepare order items
+    // Prepare order items - no need to generate UUIDs anymore
     const orderItems = cart.map(item => ({
-      orderItemId: generateUUID(),
-      orderId: orderId,
       productId: item.id,
       quantity: item.quantity,
       price: item.price
     }));
     
-    // Save order items
-    saveOrderItems(orderItems);
+    // Save order items - pass the orderId to the function
+    saveOrderItems(orderItems, orderId);
 
     const responseData = {
       success: true,
