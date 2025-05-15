@@ -11,7 +11,10 @@ function doGet(e) {
 
   if (action === 'getProducts') {
     return ContentService.createTextOutput(JSON.stringify(getProducts()))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader('Access-Control-Allow-Origin', '*')
+      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
   }
 
   // Fallback: serve HTML
@@ -101,20 +104,26 @@ function doPost(e) {
       ]);
     });
 
-    // Return JSON response with order details for confirmation
+    // Return JSON response with CORS headers
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
       orderId: orderId,
       total: total,
       paymentMethod: payment.method
     }))
-    .setMimeType(ContentService.MimeType.JSON);
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ 
       success: false, 
       error: err.message 
     }))
-    .setMimeType(ContentService.MimeType.JSON);
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
   }
 }
 
@@ -122,6 +131,7 @@ function doOptions(e) {
   return ContentService.createTextOutput("")
     .setMimeType(ContentService.MimeType.TEXT)
     .setHeader("Access-Control-Allow-Origin", "*")
-    .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
-    .setHeader("Access-Control-Allow-Headers", "Content-Type");
+    .setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+    .setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    .setHeader("Access-Control-Max-Age", "3600");
 }
