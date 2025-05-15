@@ -622,12 +622,15 @@
           const cartModal = new bootstrap.Modal(cartModalEl);
           const checkoutModalEl = document.getElementById('checkoutModal');
           const checkoutModal = new bootstrap.Modal(checkoutModalEl);
+          const orderConfirmationModalEl = document.getElementById('orderConfirmationModal');
+          const orderConfirmationModal = new bootstrap.Modal(orderConfirmationModalEl);
           const toastEl = document.getElementById('toast');
           const toast = new bootstrap.Toast(toastEl, { delay: 2000 });
           
           // Make these available to global scope
           window.cartModal = cartModal;
           window.checkoutModal = checkoutModal;
+          window.orderConfirmationModal = orderConfirmationModal;
           window.toast = toast;
           updateCartCount();
         }
@@ -862,7 +865,7 @@
           checkoutBtn.style.display = "inline-block";
       }
 
-        cartModal.show();
+        openModal(cartModal);
     }
 
       function removeFromCart(productId) {
@@ -889,7 +892,9 @@
       }
 
       function closeCart() {
-        cartModal.hide();
+        if (window.cartModal) {
+          cartModal.hide();
+        }
       }
 
       function clearCart() {
@@ -916,13 +921,11 @@
       }
 
       function checkoutCart() {
-        cartModal.hide();
-        
         // Populate the checkout items and total
         updateCheckoutSummary();
         
-        // Show the checkout modal
-        checkoutModal.show();
+        // Use the new openModal helper
+        openModal(checkoutModal);
       }
 
       function updateCheckoutSummary() {
@@ -967,129 +970,10 @@
       }
 
       function closeCheckout() {
-        checkoutModal.hide();
-      }
-
-        // ✅ Load products with caching
-        const CACHE_KEY = "product_cache";
-        const CACHE_TIME_KEY = "product_cache_time";
-        const CACHE_EXPIRY_MS = 1000 * 60 * 5; // 5 minutes
-
-        const cached = sessionStorage.getItem(CACHE_KEY);
-        const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY);
-        const urlParams = new URLSearchParams(window.location.search);
-        const noCache = urlParams.get('nocache') === '1';
-
-      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyavb_FgAhAgAT8enSue64A4mPRv2in0yIxaoIAfRTaum5eLc--BmXjbGW3CWbvdg3q/exec';
-
-        if (!noCache && cached && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_EXPIRY_MS) {
-          allProducts = JSON.parse(cached);
-          filteredProducts = allProducts;
-          renderProducts(filteredProducts);
-        } else {
-          // Create a JSONP request by dynamically adding a script tag
-          const script = document.createElement('script');
-          script.src = `${SCRIPT_URL}?action=getProducts&callback=handleProductsResponse`;
-          document.body.appendChild(script);
-        }
-
-      // Add this function to handle the JSONP response
-      function handleProductsResponse(products) {
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify(products));
-        sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-            allProducts = products;
-            filteredProducts = allProducts;
-            renderProducts(filteredProducts);
-      }
-
-      // Update the checkout form submission handler
-      document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Get and format the phone number with country code
-        let phoneNumber = document.getElementById('custPhone').value.replace(/[^0-9]/g, '');
-        if (phoneNumber.startsWith('0')) {
-          phoneNumber = phoneNumber.substring(1);
-        }
-        phoneNumber = '+62' + phoneNumber;
-        
-        // Disable the submit button and show loading state
-        const submitBtn = document.getElementById('submitOrderBtn');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
-        
-        // Calculate total
-        const total = calculateCartTotal();
-        
-        // Generate the order ID here so we can use it in both places
-        const timestamp = Date.now().toString().slice(-6);
-        const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const generatedOrderId = `ORD-${timestamp}-${randomPart}`;
-        
-        // Get the selected shipping option
-        const shippingOption = document.querySelector('input[name="shippingOption"]:checked').value;
-        
-        // Prepare the order data
-        const orderData = {
-          customerName: document.getElementById('custName').value,
-          customerEmail: document.getElementById('custEmail').value,
-          customerPhone: phoneNumber, // Use the formatted phone number with country code
-          customerAddress: document.getElementById('custAddress').value,
-          paymentMethod: 'bank_transfer',
-          shippingOption: shippingOption,
-          cartItems: cart,
-          total: total,
-          downPayment: paidNow,
-          uniqueCode: uniqueCode,
-          orderId: generatedOrderId // Add the order ID to the data
-        };
-        
-        // Show the submission is in progress
-        showToast("Submitting your order...");
-        
-        // Use fetch with form-urlencoded data
-        const formData = new URLSearchParams();
-        formData.append('customerName', orderData.customerName);
-        formData.append('customerEmail', orderData.customerEmail);
-        formData.append('customerPhone', orderData.customerPhone);
-        formData.append('customerAddress', orderData.customerAddress);
-        formData.append('paymentMethod', orderData.paymentMethod);
-        formData.append('shippingOption', orderData.shippingOption);
-        formData.append('cartData', JSON.stringify(orderData.cartItems));
-        formData.append('total', orderData.total);
-        formData.append('downPayment', orderData.downPayment);
-        formData.append('uniqueCode', orderData.uniqueCode);
-        formData.append('orderId', generatedOrderId); // Pass the order ID to the backend
-        
-        fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: formData,
-          mode: 'no-cors' // Important: Use no-cors mode
-        })
-        .then(() => {
-          // Since no-cors mode doesn't give us response data, we'll just assume success
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-          
-          // Close checkout modal
+        if (window.checkoutModal) {
           checkoutModal.hide();
-          
-          // Use the same order ID for the confirmation
-          showOrderConfirmation(generatedOrderId, total, 'bank_transfer', shippingOption);
-          
-          // Clear the cart
-          clearCart();
-        })
-        .catch(error => {
-          // Re-enable the submit button
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-          
-          console.error('Request failed:', error);
-          alert('Failed to submit order. Please try again later.');
-        });
-      });
+        }
+      }
 
       function showOrderConfirmation(orderId, total, paymentMethod, shippingOption) {
         // Set order details in confirmation modal
@@ -1131,9 +1015,13 @@
           `;
         }
         
-        // Initialize and show the confirmation modal
-        const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
-        orderConfirmationModal.show();
+        // Initialize the confirmation modal if not already done
+        if (!window.orderConfirmationModal) {
+          window.orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
+        }
+        
+        // Use the new openModal helper
+        openModal(orderConfirmationModal);
       }
 
       function calculateCartTotal() {
@@ -1219,6 +1107,27 @@
       // Call this on load and on resize
       window.addEventListener('load', applySmallScreenLayout);
       window.addEventListener('resize', applySmallScreenLayout);
+
+      // Add this function to your JavaScript to ensure modals are properly closed before opening new ones
+      function openModal(modalToOpen) {
+        // Close all other modals first
+        if (window.cartModal && cartModal._isShown) {
+          cartModal.hide();
+        }
+        
+        if (window.checkoutModal && checkoutModal._isShown) {
+          checkoutModal.hide();
+        }
+        
+        if (window.orderConfirmationModal && orderConfirmationModal._isShown) {
+          orderConfirmationModal.hide();
+        }
+        
+        // Open the requested modal after a short delay to ensure smooth transitions
+        setTimeout(() => {
+          modalToOpen.show();
+        }, 150);
+      }
     </script>
   </body>
 </html>
