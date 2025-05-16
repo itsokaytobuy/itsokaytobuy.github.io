@@ -1140,12 +1140,12 @@
                   if (prevAlert) prevAlert.remove();
                   checkoutModalBody.insertAdjacentHTML('afterbegin', errorMessage);
                 }
-                closeCheckout();
-                openCart();
+
+                // Do not close the modal immediately; let the user handle the issue
                 return;
               }
               
-                if (result.validation.updatedPrices?.length > 0) {
+              if (result.validation.updatedPrices?.length > 0) {
                 // Show Bootstrap alert-warning in the checkout modal
                 let warningHtml = `
                   <div class="alert alert-warning" role="alert">
@@ -1160,6 +1160,7 @@
                   Please review and confirm to update your cart with the new prices.
                   </div>
                 `;
+
                 // Insert the alert at the top of the checkout modal body
                 const checkoutModalBody = document.querySelector('#checkoutModal .modal-body');
                 if (checkoutModalBody) {
@@ -1168,8 +1169,13 @@
                   if (prevWarning) prevWarning.remove();
                   checkoutModalBody.insertAdjacentHTML('afterbegin', warningHtml);
                 }
-                
-                if (confirm(message + '\n\nWould you like to update your cart with the new prices?')) {
+
+                // Wait for user confirmation
+                const userConfirmed = confirm(
+                  'Some prices have changed. Would you like to update your cart with the new prices?'
+                );
+
+                if (userConfirmed) {
                   // Update cart with new prices
                   result.validation.updatedPrices.forEach(item => {
                     const cartItem = cart.find(i => i.id === item.id);
@@ -1180,10 +1186,10 @@
                   saveCart();
                   closeCheckout();
                   openCart();
-                  return;
-                } else {
-                  return;
                 }
+
+                // If the user cancels, do nothing and keep the modal open
+                return;
               }
             }
             throw new Error(result.error || 'Failed to process order');
