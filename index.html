@@ -107,8 +107,9 @@
       /* Floating buttons */
       .floating-buttons {
         position: fixed;
-        bottom: 1rem;
+        bottom: 50%;
         right: 1rem;
+        transform: translateY(50%);
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
@@ -1174,7 +1175,7 @@
           paymentInstructions.innerHTML = `
             <div class="alert alert-primary mt-3">
               <h5 class="mb-3">Bank Transfer Instructions:</h5>
-              <p class="mb-2">Please transfer the down payment of <strong style="font-size: 1.1rem;">${formatRupiah(paidNow)}</strong> to:</p>
+              <p class="mb-2">Please transfer the down payment of <strong style="font-size: 1.1rem;">${formatRupiah(paidNow)}</strong> (50% of total) to:</p>
               <div class="bg-light p-3 rounded border mb-3" style="user-select: text; -webkit-user-select: text;">
                 <p class="mb-2"><strong>Bank:</strong> BANK JAGO</p>
                 <p class="mb-2"><strong>Account Number:</strong> <span style="font-size: 1.2rem; font-weight: 600;">105801321294</span></p>
