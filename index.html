@@ -742,12 +742,12 @@
         });
 
         const totalPages = Math.ceil(products.length / productsPerPage);
-        document.getElementById("currentPage").innerText = currentPage;
-        document.getElementById("totalPages").innerText = totalPages;
         
         // Update the previous/next buttons' disabled state
         document.getElementById("prevPageItem").classList.toggle("disabled", currentPage <= 1);
         document.getElementById("nextPageItem").classList.toggle("disabled", currentPage >= totalPages);
+
+        renderPagination(Math.ceil(products.length / productsPerPage));
       }
 
       function filterProducts() {
