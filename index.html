@@ -335,20 +335,26 @@
     </header>
 
     <!-- Navigation-->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
       <div class="container px-4 px-lg-5">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <a class="navbar-brand fw-bold" href="#">ItsOkaytoBuy</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <form class="d-flex ms-auto">
-            <input class="form-control me-2" type="search" id="search" placeholder="Search products..." oninput="filterProducts()">
+          <form class="d-flex ms-auto my-2 my-lg-0" role="search">
+            <input class="form-control me-2" type="search" id="search" placeholder="Search products..." aria-label="Search" oninput="filterProducts()">
           </form>
-          <button class="btn btn-light ms-2" onclick="openCart()">
-            <i class="bi-cart-fill me-1"></i>
-            Cart
-            <span class="badge bg-primary text-white ms-1 rounded-pill" id="cartCount">0</span>
-          </button>
+          <ul class="navbar-nav ms-3 mb-2 mb-lg-0">
+            <li class="nav-item">
+              <button class="btn btn-light position-relative" onclick="openCart()">
+                <i class="bi bi-cart-fill me-1"></i>
+                Cart
+                <span class="badge bg-primary text-white ms-1 rounded-pill position-absolute top-0 start-100 translate-middle" id="cartCount" style="font-size:0.8em;">0</span>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
     </nav>
