@@ -371,6 +371,22 @@
       </div>
     </nav>
 
+    <!-- Add this after your navbar -->
+    <div class="offcanvas offcanvas-top" tabindex="-1" id="offcanvasSearch" aria-labelledby="offcanvasSearchLabel">
+      <div class="offcanvas-header">
+        <h5 id="offcanvasSearchLabel">Search Products</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <form class="d-flex" role="search">
+          <input class="form-control me-2" type="search" id="offcanvasSearchInput" placeholder="Search products..." aria-label="Search" oninput="syncSearchFields(this.value)">
+          <button type="button" class="btn btn-outline-primary" data-bs-dismiss="offcanvas">
+            <i class="bi bi-x"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
     <!-- Add this after the navbar section -->
     <div id="floatingSearch" class="floating-search-container">
       <div class="container">
@@ -443,7 +459,8 @@
     <div id="screen-flash" class="screen-flash"></div>
 
     <div class="floating-buttons d-md-none">
-      <button class="btn btn-primary rounded-circle" onclick="toggleSearchFocus()" title="Search Products">
+      <!-- Example button to trigger search -->
+      <button class="btn btn-primary rounded-circle" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch" title="Search Products">
         <i class="bi bi-search fs-4"></i>
       </button>
       <button class="btn btn-primary rounded-circle" onclick="openCart()" title="View Cart">
