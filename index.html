@@ -343,6 +343,19 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <!-- Category Dropdown -->
+          <ul class="navbar-nav me-3 mb-2 mb-lg-0">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Category
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="categoryDropdown" id="categoryMenu">
+                <li><a class="dropdown-item" href="#" onclick="filterByCategory('All')">All</a></li>
+                <!-- Categories will be dynamically inserted here -->
+              </ul>
+            </li>
+          </ul>
+          <!-- Search form and cart button remain unchanged -->
           <form class="d-flex ms-auto my-2 my-lg-0" role="search">
             <input class="form-control me-2" type="search" id="search" placeholder="Search products..." aria-label="Search" oninput="filterProducts()">
           </form>
@@ -1041,6 +1054,7 @@
           allProducts = JSON.parse(cached);
           filteredProducts = allProducts;
           renderProducts(filteredProducts);
+          populateCategoryMenu();
         } else {
           // Create a JSONP request by dynamically adding a script tag
           const script = document.createElement('script');
@@ -1055,6 +1069,7 @@
             allProducts = products;
             filteredProducts = allProducts;
             renderProducts(filteredProducts);
+            populateCategoryMenu();
       }
 
       // Update the checkout form submission handler
@@ -1308,6 +1323,33 @@
         currentPage = pageNumber;
         renderProducts(filteredProducts); // Call your function to render products
         renderPagination(Math.ceil(filteredProducts.length / productsPerPage)); // Update pagination
+      }
+
+      // Collect unique categories and populate the dropdown
+      function populateCategoryMenu() {
+        const menu = document.getElementById('categoryMenu');
+        // Remove old categories except "All"
+        menu.querySelectorAll('li:not(:first-child)').forEach(li => li.remove());
+        const categories = Array.from(new Set(allProducts.map(p => p.category).filter(Boolean)));
+        categories.forEach(cat => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a class="dropdown-item" href="#" onclick="filterByCategory('${cat.replace(/'/g, "\\'")}')">${cat}</a>`;
+          menu.appendChild(li);
+        });
+      }
+
+      // Filter products by category
+      function filterByCategory(category) {
+        if (category === 'All') {
+          filteredProducts = allProducts;
+        } else {
+          filteredProducts = allProducts.filter(p => p.category === category);
+        }
+        currentPage = 1;
+        renderProducts(filteredProducts);
+        renderPagination(Math.ceil(filteredProducts.length / productsPerPage));
+        // Optionally update dropdown label
+        document.getElementById('categoryDropdown').textContent = category;
       }
     </script>
   </body>
