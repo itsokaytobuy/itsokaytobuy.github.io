@@ -390,18 +390,30 @@
     <!-- Section-->
     <section class="py-5">
       <div class="container px-4 px-lg-5 mt-5">
-        <div id="productContainer" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-          <!-- Product cards will be dynamically inserted here by JavaScript -->
+        <div class="row">
+          <!-- Category List Group Sidebar -->
+          <aside class="col-md-3 mb-4">
+            <div class="list-group" id="categoryListGroup">
+              <button type="button" class="list-group-item list-group-item-action active" onclick="filterByCategory('All')">
+                All
+              </button>
+              <!-- Categories will be dynamically inserted here -->
+            </div>
+          </aside>
+          <!-- Product Grid -->
+          <div class="col-md-9">
+            <div id="productContainer" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+              <!-- Product cards will be dynamically inserted here by JavaScript -->
+            </div>
+            <!-- Pagination controls -->
+            <div class="d-flex justify-content-center mt-4">
+              <nav aria-label="Product navigation">
+                <ul class="pagination" id="paginationContainer"></ul>
+              </nav>
+            </div>
+          </div>
         </div>
-        <!-- Add pagination controls -->
-        <div class="d-flex justify-content-center mt-4">
-          <nav aria-label="Product navigation">
-            <ul class="pagination" id="paginationContainer">
-              <!-- Pagination items will be dynamically inserted here -->
-            </ul>
-          </nav>
-        </div>
-    </div>
+      </div>
     </section>
 
     <!-- Cart Modal -->
@@ -1295,14 +1307,17 @@
 
       // Collect unique categories and populate the dropdown
       function populateCategoryMenu() {
-        const menu = document.getElementById('categoryMenu');
+        const listGroup = document.getElementById('categoryListGroup');
         // Remove old categories except "All"
-        menu.querySelectorAll('li:not(:first-child)').forEach(li => li.remove());
+        listGroup.querySelectorAll('button:not(:first-child)').forEach(btn => btn.remove());
         const categories = Array.from(new Set(allProducts.map(p => p.category).filter(Boolean)));
         categories.forEach(cat => {
-          const li = document.createElement('li');
-          li.innerHTML = `<a class="dropdown-item" href="#" onclick="filterByCategory('${cat.replace(/'/g, "\\'")}')">${cat}</a>`;
-          menu.appendChild(li);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'list-group-item list-group-item-action';
+          btn.textContent = cat;
+          btn.onclick = () => filterByCategory(cat);
+          listGroup.appendChild(btn);
         });
       }
 
@@ -1316,8 +1331,10 @@
         currentPage = 1;
         renderProducts(filteredProducts);
         renderPagination(Math.ceil(filteredProducts.length / productsPerPage));
-        // Optionally update dropdown label
-        document.getElementById('categoryDropdown').textContent = category;
+        // Highlight active category
+        document.querySelectorAll('#categoryListGroup .list-group-item').forEach(btn => {
+          btn.classList.toggle('active', btn.textContent === category);
+        });
       }
     </script>
   </body>
