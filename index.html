@@ -1083,7 +1083,7 @@
         e.preventDefault();
         
         try {
-          const submitButton = this.querySelector('button[type="submit"]');
+          const submitButton = document.getElementById('submitOrderBtn');
           submitButton.disabled = true;
           submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
           
