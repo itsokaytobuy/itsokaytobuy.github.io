@@ -1101,7 +1101,7 @@
         // Generate the order ID here so we can use it in both places
         const timestamp = Date.now().toString().slice(-6);
         const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const generatedOrderId = `IOKB-${timestamp}-${randomPart}`;
+        const generatedOrderId = `ORD-${timestamp}-${randomPart}`;
         
         // Get the selected shipping option
         const shippingOption = document.querySelector('input[name="shippingOption"]:checked').value;

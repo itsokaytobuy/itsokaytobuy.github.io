@@ -260,41 +260,21 @@ function findOrCreateCustomer(customerId, name, email, phone, address) {
 // Save order data to spreadsheet
 function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMethod, shippingOption) {
   try {
+    // Ensure sheets exist
+    ensureSheetsExist();
+    
     const sheet = getSpreadsheet().getSheetByName("Orders");
-    const header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    sheet.appendRow([
+      orderId,
+      customerId,
+      orderDate,
+      total,
+      status,
+      dp,
+      paymentMethod,
+      shippingOption
+    ]);
     
-    // Map columns to their indexes
-    const columns = {
-      orderId: header.indexOf("orderId"),
-      customerId: header.indexOf("customerId"),
-      date: header.indexOf("date"),
-      total: header.indexOf("total"),
-      status: header.indexOf("status"),
-      downPayment: header.indexOf("downPayment"),
-      paymentMethod: header.indexOf("paymentMethod"),
-      shippingOption: header.indexOf("shippingOption")
-    };
-    
-    // Validate required columns exist
-    const requiredColumns = ["orderId", "customerId", "date", "total"];
-    for (const col of requiredColumns) {
-      if (columns[col] === -1) {
-        throw new Error(`Required column ${col} not found in Orders sheet`);
-      }
-    }
-    
-    // Create row data array matching column order in sheet
-    const rowData = new Array(header.length).fill("");
-    rowData[columns.orderId] = orderId;
-    rowData[columns.customerId] = customerId;
-    rowData[columns.date] = orderDate;
-    rowData[columns.total] = total;
-    rowData[columns.status] = status;
-    rowData[columns.downPayment] = dp;
-    rowData[columns.paymentMethod] = paymentMethod;
-    rowData[columns.shippingOption] = shippingOption;
-    
-    sheet.appendRow(rowData);
     return true;
   } catch (error) {
     console.error("Error saving order:", error);
