@@ -337,7 +337,6 @@
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
       <div class="container px-4 px-lg-5">
-        <a class="navbar-brand" href="#">ItsOkaytoBuy</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -381,26 +380,8 @@
         <!-- Add pagination controls -->
         <div class="d-flex justify-content-center mt-4">
           <nav aria-label="Product navigation">
-            <ul class="pagination">
-              <li class="page-item" id="prevPageItem">
-                <button class="page-link rounded-start" onclick="changePage(-1)">
-                  <i class="bi bi-chevron-left"></i>
-                </button>
-              </li>
-              <li class="page-item active" id="currentPageItem">
-                <span class="page-link" id="currentPage">1</span>
-              </li>
-              <li class="page-item disabled">
-                <span class="page-link">of</span>
-              </li>
-              <li class="page-item" id="totalPagesItem">
-                <span class="page-link" id="totalPages">1</span>
-              </li>
-              <li class="page-item" id="nextPageItem">
-                <button class="page-link rounded-end" onclick="changePage(1)">
-                  <i class="bi bi-chevron-right"></i>
-                </button>
-              </li>
+            <ul class="pagination" id="paginationContainer">
+              <!-- Pagination items will be dynamically inserted here -->
             </ul>
           </nav>
         </div>
@@ -1287,6 +1268,41 @@
       // Call this on load and on resize
       window.addEventListener('load', applySmallScreenLayout);
       window.addEventListener('resize', applySmallScreenLayout);
+
+      function renderPagination(totalPages) {
+        const paginationContainer = document.getElementById('paginationContainer');
+        paginationContainer.innerHTML = ''; // Clear existing pagination
+
+        // Previous button
+        const prevItem = document.createElement('li');
+        prevItem.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+        prevItem.innerHTML = `<button class="page-link" onclick="changePage(-1)" aria-label="Previous">
+                              <i class="bi bi-chevron-left"></i>
+                            </button>`;
+        paginationContainer.appendChild(prevItem);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+          const pageItem = document.createElement('li');
+          pageItem.className = 'page-item' + (i === currentPage ? ' active' : '');
+          pageItem.innerHTML = `<button class="page-link" onclick="goToPage(${i})">${i}</button>`;
+          paginationContainer.appendChild(pageItem);
+        }
+
+        // Next button
+        const nextItem = document.createElement('li');
+        nextItem.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+        nextItem.innerHTML = `<button class="page-link" onclick="changePage(1)" aria-label="Next">
+                              <i class="bi bi-chevron-right"></i>
+                            </button>`;
+        paginationContainer.appendChild(nextItem);
+      }
+
+      function goToPage(pageNumber) {
+        currentPage = pageNumber;
+        renderProducts(filteredProducts); // Call your function to render products
+        renderPagination(Math.ceil(filteredProducts.length / productsPerPage)); // Update pagination
+      }
     </script>
   </body>
 </html>
