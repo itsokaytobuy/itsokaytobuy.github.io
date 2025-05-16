@@ -331,70 +331,98 @@ function saveOrderItems(orderItems, orderId) {
   }
 }
 
+// Validate cart products
+function validateCartProducts(productIds) {
+  try {
+    const sheet = getSpreadsheet().getSheetByName("Products");
+    const data = sheet.getDataRange().getValues();
+    const header = data[0];
+    
+    // Get column indexes
+    const idIndex = header.indexOf("id");
+    const activeIndex = header.indexOf("active");
+    const nameIndex = header.indexOf("name");
+    
+    if (idIndex === -1 || activeIndex === -1 || nameIndex === -1) {
+      throw new Error("Required columns not found");
+    }
+    
+    // Create a map of product status
+    const productStatus = {};
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const id = row[idIndex];
+      if (productIds.includes(id)) {
+        productStatus[id] = {
+          active: row[activeIndex] === true || row[activeIndex] === "TRUE",
+          name: row[nameIndex]
+        };
+      }
+    }
+    
+    return productStatus;
+  } catch (error) {
+    console.error("Error validating cart products:", error);
+    throw error;
+  }
+}
+
 // Handle GET requests
 function doGet(e) {
-  // If e or e.parameter is missing, or action is not present, serve HTML
-  if (!e || !e.parameter || !e.parameter.action) {
-    const htmlOutput = HtmlService.createHtmlOutputFromFile('index');
-    htmlOutput.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-    return htmlOutput;
-  }
-
-  // If action is present, handle API request
-  const action = e.parameter.action;
-  const callback = e.parameter.callback || '';
-
-  if (action === 'getProducts') {
-    const products = getProducts();
+  try {
+    const action = e.parameter.action;
     
-    if (callback) {
-      // Return JSONP response with callback
-      return ContentService.createTextOutput(`${callback}(${JSON.stringify(products)})`)
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    } else {
-      // Return standard JSON response
-      return ContentService.createTextOutput(JSON.stringify(products))
+    switch(action) {
+      case 'getProducts':
+        const products = getProducts();
+        return ContentService.createTextOutput(JSON.stringify(products))
+          .setMimeType(ContentService.MimeType.JSON)
+          .setHeader('Access-Control-Allow-Origin', '*')
+          .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+          .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      
+      case 'test':
+        ensureSheetsExist();
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "success",
+          message: "API is working correctly",
+          timestamp: new Date().toISOString()
+        }))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeader('Access-Control-Allow-Origin', '*')
+        .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      
+      case 'validateCart':
+        const productIds = JSON.parse(e.parameter.productIds);
+        const productStatus = validateCartProducts(productIds);
+        return ContentService.createTextOutput(JSON.stringify({
+          success: true,
+          data: productStatus
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+      
+      default:
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "error",
+          message: "Unknown action requested"
+        }))
         .setMimeType(ContentService.MimeType.JSON)
         .setHeader('Access-Control-Allow-Origin', '*')
         .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         .setHeader('Access-Control-Allow-Headers', 'Content-Type');
     }
+  } catch(error) {
+    console.error("Error in doGet:", error);
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: error.message
+    }))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
   }
-  
-  // Test API connectivity
-  if (action === 'test') {
-    // Ensure sheets exist during test
-    ensureSheetsExist();
-    
-    if (callback) {
-      return ContentService.createTextOutput(callback + '(' + JSON.stringify({
-        status: "success",
-        message: "API is working correctly",
-        timestamp: new Date().toISOString()
-      }) + ')')
-      .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    } else {
-      return ContentService.createTextOutput(JSON.stringify({
-        status: "success",
-        message: "API is working correctly",
-        timestamp: new Date().toISOString()
-      }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeader('Access-Control-Allow-Origin', '*')
-      .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-      .setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    }
-  }
-
-  // Fallback: serve API info
-  return ContentService.createTextOutput(JSON.stringify({
-    status: "error",
-    message: "Unknown action requested"
-  }))
-  .setMimeType(ContentService.MimeType.JSON)
-  .setHeader('Access-Control-Allow-Origin', '*')
-  .setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-  .setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
 // Handle POST requests
