@@ -342,7 +342,7 @@ function saveOrderItems(orderItems, orderId) {
 function doGet(e) {
   // If e or e.parameter is missing, or action is not present, serve HTML
   if (!e || !e.parameter || !e.parameter.action) {
-    const htmlOutput = HtmlService.createHtmlOutput("<h1>ItsOkayToBuy API</h1><p>This is an API for the ItsOkayToBuy shop.</p>");
+    const htmlOutput = HtmlService.createHtmlOutputFromFile('index');
     htmlOutput.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     return htmlOutput;
   }
