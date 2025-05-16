@@ -1100,7 +1100,10 @@
               price: item.price
             })),
             paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-            shippingOption: document.querySelector('input[name="shippingOption"]:checked').value
+            shippingOption: document.querySelector('input[name="shippingOption"]:checked').value,
+            uniqueCode: uniqueCode,
+            downPayment: downPayment,
+            paidNow: paidNow
           };
           
           const response = await fetch(SCRIPT_URL, {
@@ -1156,8 +1159,9 @@
         } catch (error) {
           alert('Error processing order: ' + error.message);
         } finally {
+          const submitButton = document.getElementById('submitOrderBtn');
           submitButton.disabled = false;
-          submitButton.textContent = 'Place Order';
+          submitButton.innerHTML = '<i class="bi bi-receipt me-1"></i> Submit Order';
         }
       });
 
