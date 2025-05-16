@@ -1079,92 +1079,86 @@
       }
 
       // Update the checkout form submission handler
-      document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+      document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Get and format the phone number with country code
-        let phoneNumber = document.getElementById('custPhone').value.replace(/[^0-9]/g, '');
-        if (phoneNumber.startsWith('0')) {
-          phoneNumber = phoneNumber.substring(1);
-        }
-        phoneNumber = '+62' + phoneNumber;
-        
-        // Disable the submit button and show loading state
-        const submitBtn = document.getElementById('submitOrderBtn');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
-        
-        // Calculate total
-        const total = calculateCartTotal();
-        
-        // Generate the order ID here so we can use it in both places
-        const timestamp = Date.now().toString().slice(-6);
-        const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const generatedOrderId = `IOKB-${timestamp}-${randomPart}`;
-        
-        // Get the selected shipping option
-        const shippingOption = document.querySelector('input[name="shippingOption"]:checked').value;
-        
-        // Prepare the order data
-        const orderData = {
-          customerName: document.getElementById('custName').value,
-          customerEmail: document.getElementById('custEmail').value,
-          customerPhone: phoneNumber, // Use the formatted phone number with country code
-          customerAddress: document.getElementById('custAddress').value,
-          paymentMethod: 'bank_transfer',
-          shippingOption: shippingOption,
-          cartItems: cart,
-          total: total,
-          downPayment: paidNow,
-          uniqueCode: uniqueCode,
-          orderId: generatedOrderId // Add the order ID to the data
-        };
-        
-        // Show the submission is in progress
-        showToast("Submitting your order...");
-        
-        // Use fetch with form-urlencoded data
-        const formData = new URLSearchParams();
-        formData.append('customerName', orderData.customerName);
-        formData.append('customerEmail', orderData.customerEmail);
-        formData.append('customerPhone', orderData.customerPhone);
-        formData.append('customerAddress', orderData.customerAddress);
-        formData.append('paymentMethod', orderData.paymentMethod);
-        formData.append('shippingOption', orderData.shippingOption);
-        formData.append('cartData', JSON.stringify(orderData.cartItems));
-        formData.append('total', orderData.total);
-        formData.append('downPayment', orderData.downPayment);
-        formData.append('uniqueCode', orderData.uniqueCode);
-        formData.append('orderId', generatedOrderId); // Pass the order ID to the backend
-        
-        fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: formData,
-          mode: 'no-cors' // Important: Use no-cors mode
-        })
-        .then(() => {
-          // Since no-cors mode doesn't give us response data, we'll just assume success
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
+        try {
+          const submitButton = this.querySelector('button[type="submit"]');
+          submitButton.disabled = true;
+          submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
           
-          // Close checkout modal
-          checkoutModal.hide();
+          const formData = {
+            customer: {
+              name: document.getElementById('custName').value,
+              phone: document.getElementById('custPhone').value,
+              email: document.getElementById('custEmail').value,
+              address: document.getElementById('custAddress').value
+            },
+            items: cart.map(item => ({
+              productId: item.id,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
+            shippingOption: document.querySelector('input[name="shippingOption"]:checked').value
+          };
           
-          // Use the same order ID for the confirmation
-          showOrderConfirmation(generatedOrderId, total, 'bank_transfer', shippingOption);
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(formData)
+          });
           
-          // Clear the cart
+          const result = await response.json();
+          
+          if (!result.success) {
+            if (result.validation) {
+              if (result.validation.invalidProducts?.length > 0) {
+                let errorMessage = 'The following items are no longer available:\n\n';
+                result.validation.invalidProducts.forEach(product => {
+                  errorMessage += `- ${product.name} (${product.reason})\n`;
+                });
+                alert(errorMessage + '\n\nPlease remove these items from your cart and try again.');
+                closeCheckout();
+                openCart();
+                return;
+              }
+              
+              if (result.validation.updatedPrices?.length > 0) {
+                let message = 'Some prices have changed:\n\n';
+                result.validation.updatedPrices.forEach(item => {
+                  message += `- ${item.name}: ${formatRupiah(item.oldPrice)} → ${formatRupiah(item.newPrice)}\n`;
+                });
+                
+                if (confirm(message + '\n\nWould you like to update your cart with the new prices?')) {
+                  // Update cart with new prices
+                  result.validation.updatedPrices.forEach(item => {
+                    const cartItem = cart.find(i => i.id === item.id);
+                    if (cartItem) {
+                      cartItem.price = item.newPrice;
+                    }
+                  });
+                  saveCart();
+                  closeCheckout();
+                  openCart();
+                  return;
+                } else {
+                  return;
+                }
+              }
+            }
+            throw new Error(result.error);
+          }
+          
+          // Handle successful order
+          showOrderConfirmation(result.orderId, result.total, formData.paymentMethod, formData.shippingOption);
           clearCart();
-        })
-        .catch(error => {
-          // Re-enable the submit button
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
           
-          console.error('Request failed:', error);
-          alert('Failed to submit order. Please try again later.');
-        });
+        } catch (error) {
+          alert('Error processing order: ' + error.message);
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Place Order';
+        }
       });
 
       function showOrderConfirmation(orderId, total, paymentMethod, shippingOption) {
