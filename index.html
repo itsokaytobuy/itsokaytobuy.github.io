@@ -342,22 +342,11 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <!-- Category Dropdown -->
-          <ul class="navbar-nav me-3 mb-2 mb-lg-0">
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Category
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="categoryDropdown" id="categoryMenu">
-                <li><a class="dropdown-item" href="#" onclick="filterByCategory('All')">All</a></li>
-                <!-- Categories will be dynamically inserted here -->
-              </ul>
-            </li>
-          </ul>
-          <!-- Search form and cart button remain unchanged -->
+          <!-- Search form -->
           <form class="d-flex ms-auto my-2 my-lg-0" role="search">
             <input class="form-control me-2" type="search" id="search" placeholder="Search products..." aria-label="Search" oninput="filterProducts()">
           </form>
+          <!-- Cart button -->
           <ul class="navbar-nav ms-3 mb-2 mb-lg-0">
             <li class="nav-item">
               <button class="btn btn-light position-relative" onclick="openCart()">
