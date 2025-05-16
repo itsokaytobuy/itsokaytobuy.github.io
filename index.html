@@ -392,7 +392,7 @@
       <div class="container px-4 px-lg-5 mt-5">
         <div class="row">
           <!-- Category List Group Sidebar -->
-          <aside class="col-md-3 mb-4">
+          <aside class="col-md-3 mb-4 d-none d-md-block">
             <div class="list-group" id="categoryListGroup">
               <button type="button" class="list-group-item list-group-item-action active" onclick="filterByCategory('All')">
                 All
@@ -400,6 +400,13 @@
               <!-- Categories will be dynamically inserted here -->
             </div>
           </aside>
+          <!-- Mobile category dropdown: only visible on mobile -->
+          <div class="mb-3 d-block d-md-none">
+            <select class="form-select" id="mobileCategoryDropdown" onchange="filterByCategory(this.value)">
+              <option value="All">All</option>
+              <!-- Categories will be dynamically inserted here -->
+            </select>
+          </div>
           <!-- Product Grid -->
           <div class="col-md-9">
             <div id="productContainer" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
@@ -1307,17 +1314,35 @@
 
       // Collect unique categories and populate the dropdown
       function populateCategoryMenu() {
+        // Sidebar list group (desktop)
         const listGroup = document.getElementById('categoryListGroup');
-        // Remove old categories except "All"
-        listGroup.querySelectorAll('button:not(:first-child)').forEach(btn => btn.remove());
+        if (listGroup) {
+          listGroup.querySelectorAll('button:not(:first-child)').forEach(btn => btn.remove());
+        }
+        // Mobile dropdown
+        const mobileDropdown = document.getElementById('mobileCategoryDropdown');
+        if (mobileDropdown) {
+          mobileDropdown.querySelectorAll('option:not([value="All"])').forEach(opt => opt.remove());
+        }
+        // Unique categories
         const categories = Array.from(new Set(allProducts.map(p => p.category).filter(Boolean)));
         categories.forEach(cat => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'list-group-item list-group-item-action';
-          btn.textContent = cat;
-          btn.onclick = () => filterByCategory(cat);
-          listGroup.appendChild(btn);
+          // Sidebar
+          if (listGroup) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'list-group-item list-group-item-action';
+            btn.textContent = cat;
+            btn.onclick = () => filterByCategory(cat);
+            listGroup.appendChild(btn);
+          }
+          // Mobile dropdown
+          if (mobileDropdown) {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.textContent = cat;
+            mobileDropdown.appendChild(opt);
+          }
         });
       }
 
@@ -1331,10 +1356,15 @@
         currentPage = 1;
         renderProducts(filteredProducts);
         renderPagination(Math.ceil(filteredProducts.length / productsPerPage));
-        // Highlight active category
+        // Highlight active in sidebar
         document.querySelectorAll('#categoryListGroup .list-group-item').forEach(btn => {
           btn.classList.toggle('active', btn.textContent === category);
         });
+        // Set dropdown value on mobile
+        const mobileDropdown = document.getElementById('mobileCategoryDropdown');
+        if (mobileDropdown) {
+          mobileDropdown.value = category;
+        }
       }
     </script>
   </body>
