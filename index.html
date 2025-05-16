@@ -742,10 +742,6 @@
         });
 
         const totalPages = Math.ceil(products.length / productsPerPage);
-        
-        // Update the previous/next buttons' disabled state
-        document.getElementById("prevPageItem").classList.toggle("disabled", currentPage <= 1);
-        document.getElementById("nextPageItem").classList.toggle("disabled", currentPage >= totalPages);
 
         renderPagination(Math.ceil(products.length / productsPerPage));
       }
