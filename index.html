@@ -393,38 +393,7 @@
     <section class="py-5">
       <div class="container px-4 px-lg-5 mt-5">
         <div id="productContainer" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-          <!-- Example Bootstrap-conformant product card -->
-          <div class="col mb-5">
-            <div class="card h-100 border-primary">
-              <img class="card-img-top img-fluid" 
-                   src="${p.imgUrl || 'https://placehold.co/200x200?text=No+Image'}" 
-                   alt="${p.name}" 
-                   onerror="this.onerror=null; this.src='https://placehold.co/200x200?text=No Image';" />
-              <div class="card-body p-4 text-center">
-                <h5 class="fw-bold mb-2" title="${p.name}">${p.name}</h5>
-                <div class="text-muted small mb-1">${p.category ? p.category : ''}</div>
-                <div class="mb-2">${formatRupiah(p.price)}</div>
-              </div>
-              <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                <div class="d-flex flex-column gap-3 align-items-center">
-                  <div class="input-group quantity-control" style="max-width: 120px;">
-                    <button class="btn btn-outline-primary" onclick="changeQuantity('${p.id}', -1)" type="button">
-                      <i class="bi bi-dash"></i>
-                    </button>
-                    <input type="number" min="1" value="1" id="qty-${p.id}" class="form-control text-center" inputmode="numeric" pattern="[0-9]*" />
-                    <button class="btn btn-outline-primary" onclick="changeQuantity('${p.id}', 1)" type="button">
-                      <i class="bi bi-plus"></i>
-                    </button>
-                  </div>
-                  <button class="btn btn-primary w-100 py-3" style="height:56px"
-                    onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
-                    <i class="bi-cart-plus me-1"></i>
-                    Add to cart
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Product cards will be rendered dynamically by JavaScript -->
         </div>
         <!-- Add pagination controls -->
         <div class="d-flex justify-content-center mt-4">
