@@ -648,6 +648,8 @@
                     <div class="text-center">
                       <!-- Product name-->
                       <h5 class="product-name fw-bolder" title="${p.name}">${p.name}</h5>
+                      <!-- Product category -->
+                      <div class="text-muted small mb-1">${p.category ? p.category : ''}</div>
                       <!-- Product price-->
                       ${formatRupiah(p.price)}
                     </div>
@@ -697,6 +699,8 @@
                     <div class="text-center">
                       <!-- Product name-->
                       <h5 class="product-name fw-bolder" title="${p.name}">${p.name}</h5>
+                      <!-- Product category -->
+                      <div class="text-muted small mb-1">${p.category ? p.category : ''}</div>
                       <!-- Product price-->
                       ${formatRupiah(p.price)}
                     </div>

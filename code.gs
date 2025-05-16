@@ -13,7 +13,7 @@ function ensureSheetsExist() {
   // Check for Products sheet
   if (!ss.getSheetByName("Products")) {
     const productsSheet = ss.insertSheet("Products");
-    productsSheet.appendRow(["id", "name", "price", "imgUrl", "desc", "active"]);
+    productsSheet.appendRow(["id", "name", "category", "price", "imgUrl", "desc", "active"]);
   }
   
   // Check for Customers sheet
@@ -59,6 +59,7 @@ function getProducts() {
     const imgUrlIndex = header.indexOf("imgUrl");
     const descIndex = header.indexOf("desc");
     const activeIndex = header.indexOf("active");
+    const categoryIndex = header.indexOf("category");
     
     // Log the column indexes for debugging
     console.log("Column indexes:", {
@@ -67,7 +68,8 @@ function getProducts() {
       price: priceIndex,
       imgUrl: imgUrlIndex,
       desc: descIndex,
-      active: activeIndex
+      active: activeIndex,
+      category: categoryIndex
     });
     
     // Make sure all required columns exist
@@ -119,6 +121,10 @@ function getProducts() {
         
         if (descIndex !== -1) {
           product.desc = row[descIndex] || "";
+        }
+        
+        if (categoryIndex !== -1) {
+          product.category = row[categoryIndex] || "";
         }
         
         products.push(product);
