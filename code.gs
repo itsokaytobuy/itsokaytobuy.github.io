@@ -202,90 +202,57 @@ function findOrCreateCustomer(customerId, name, email, phone, address) {
     
     // Check if header row exists
     if (data.length < 1) {
-      // Add header row if sheet is empty
       sheet.appendRow(["customerId", "name", "email", "phone", "address", "date"]);
+      data.push(["customerId", "name", "email", "phone", "address", "date"]);
     }
     
     const header = data[0];
     const customerIdIndex = header.indexOf("customerId");
-    const phoneIndex = header.indexOf("phone");
+    const addressIndex = header.indexOf("address");
+    const dateIndex = header.indexOf("date");
     
     // Make sure required columns exist
     if (customerIdIndex === -1) {
       throw new Error("customerId column not found in Customers sheet");
     }
-    
+
     let customerRowIndex = -1;
     
-    // Find the customer row if it exists
+    // Search for existing customer by customerId only
     for (let i = 1; i < data.length; i++) {
-      // First try to match by customerId
-      if (data[i][customerIdIndex] === customerId) {
-        customerRowIndex = i + 1; // +1 because sheet rows are 1-indexed
+      const row = data[i];
+      if (row[customerIdIndex] === customerId) {
+        customerRowIndex = i + 1;
         break;
       }
-      
-      // If phone column exists and we have a phone number, also try to match by phone
-      if (phoneIndex !== -1 && phone && data[i][phoneIndex]) {
-        // Clean both phone numbers for comparison
-        const cleanStoredPhone = String(data[i][phoneIndex]).replace(/[^0-9]/g, '');
-        const cleanInputPhone = phone.replace(/[^0-9]/g, '');
-        
-        // If last 10 digits match, it's likely the same customer
-        if (cleanStoredPhone.slice(-10) === cleanInputPhone.slice(-10)) {
-          customerRowIndex = i + 1;
-          break;
-        }
-      }
     }
-    
+
+    // If customer found, only update address and date
     if (customerRowIndex > 0) {
-      // Customer exists, update the date and other info
-      sheet.getRange(customerRowIndex, 6).setValue(new Date()); // Date
-      
-      // Also update the other fields
-      sheet.getRange(customerRowIndex, 2).setValue(name); // Name
-      sheet.getRange(customerRowIndex, 3).setValue(email); // Email
-      sheet.getRange(customerRowIndex, 4).setValue(phone); // Phone
-      sheet.getRange(customerRowIndex, 5).setValue(address); // Address
-      
-      // If we found by phone but customerId is different, update it to be consistent
-      if (data[customerRowIndex-1][customerIdIndex] !== customerId) {
-        sheet.getRange(customerRowIndex, 1).setValue(customerId);
+      // Update only address
+      if (addressIndex !== -1) {
+        sheet.getRange(customerRowIndex, addressIndex + 1).setValue(address);
       }
-      
+      // Update date
+      if (dateIndex !== -1) {
+        sheet.getRange(customerRowIndex, dateIndex + 1).setValue(new Date());
+      }
       return true;
-    } else {
-      // Customer doesn't exist, create new
-      sheet.appendRow([
-        customerId,
-        name,
-        email,
-        phone,
-        address,
-        new Date() // Add timestamp
-      ]);
-      
-      return false;
     }
+    
+    // If customer not found, create new entry with all details
+    sheet.appendRow([
+      customerId,
+      name,
+      email,
+      phone,
+      address,
+      new Date()
+    ]);
+    return false;
+
   } catch (error) {
-    console.error("Error finding/creating customer:", error);
-    
-    // Fallback to just creating a new customer entry
-    try {
-      const sheet = getSpreadsheet().getSheetByName("Customers");
-      sheet.appendRow([
-        customerId,
-        name,
-        email,
-        phone,
-        address,
-        new Date() // Add timestamp
-      ]);
-    } catch (fallbackError) {
-      console.error("Error in fallback customer creation:", fallbackError);
-    }
-    
+    console.error("Error in findOrCreateCustomer:", error);
     return false;
   }
 }
