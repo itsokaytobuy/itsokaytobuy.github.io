@@ -55,12 +55,11 @@ function getProducts() {
     // Find column indexes
     const idIndex = header.indexOf("id");
     const nameIndex = header.indexOf("name");
-    const categoryIndex = header.indexOf("category");
     const priceIndex = header.indexOf("price");
     const imgUrlIndex = header.indexOf("imgUrl");
     const descIndex = header.indexOf("desc");
     const activeIndex = header.indexOf("active");
-    
+    const categoryIndex = header.indexOf("category");
     
     // Log the column indexes for debugging
     console.log("Column indexes:", {

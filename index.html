@@ -707,7 +707,7 @@
                   </div>
                   <!-- Product actions-->
                   <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                    <div class="d-flex flex-column gap-2">
+                    <div class="d-flex flex-column gap-3">
                       <div class="quantity-control input-group">
                         <button class="btn btn-outline-primary" 
                           onclick="changeQuantity('${p.id}', -1)" 
@@ -729,7 +729,7 @@
                         </button>
                       </div>
                       <div class="text-center">
-                        <button class="btn btn-primary mt-auto" 
+                        <button class="btn btn-primary mt-auto py-3" style="height:56px"
                           onclick="addToCart('${p.id}', ${p.price}, '${encodeURIComponent(p.name)}')">
                           <i class="bi-cart-plus me-1"></i>
                           Add to cart
