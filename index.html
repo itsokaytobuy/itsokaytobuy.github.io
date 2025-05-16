@@ -1099,12 +1099,18 @@
               quantity: item.quantity,
               price: item.price
             })),
-            paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-            shippingOption: document.querySelector('input[name="shippingOption"]:checked').value,
+            // Hardcode payment method since we only accept bank transfer
+            paymentMethod: 'bank_transfer',
+            shippingOption: document.querySelector('input[name="shippingOption"]:checked')?.value,
             uniqueCode: uniqueCode,
             downPayment: downPayment,
             paidNow: paidNow
           };
+
+          // Validate required shipping option
+          if (!formData.shippingOption) {
+            throw new Error('Please select a shipping option');
+          }
           
           const response = await fetch(SCRIPT_URL, {
             method: 'POST',
@@ -1114,6 +1120,7 @@
           const result = await response.json();
           
           if (!result.success) {
+            // Preserve product validation checks
             if (result.validation) {
               if (result.validation.invalidProducts?.length > 0) {
                 let errorMessage = 'The following items are no longer available:\n\n';
@@ -1149,7 +1156,7 @@
                 }
               }
             }
-            throw new Error(result.error);
+            throw new Error(result.error || 'Failed to process order');
           }
           
           // Handle successful order
@@ -1160,8 +1167,10 @@
           alert('Error processing order: ' + error.message);
         } finally {
           const submitButton = document.getElementById('submitOrderBtn');
-          submitButton.disabled = false;
-          submitButton.innerHTML = '<i class="bi bi-receipt me-1"></i> Submit Order';
+          if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="bi bi-receipt me-1"></i> Submit Order';
+          }
         }
       });
 
