@@ -1123,21 +1123,51 @@
             // Preserve product validation checks
             if (result.validation) {
               if (result.validation.invalidProducts?.length > 0) {
-                let errorMessage = 'The following items are no longer available:\n\n';
+                let errorMessage = '<div class="alert alert-danger" role="alert">';
+                errorMessage += '<strong>The following items are no longer available:</strong><ul class="mb-2">';
                 result.validation.invalidProducts.forEach(product => {
-                  errorMessage += `- ${product.name} (${product.reason})\n`;
+                  errorMessage += `<li>${product.name} (${product.reason})</li>`;
                 });
-                alert(errorMessage + '\n\nPlease remove these items from your cart and try again.');
+                errorMessage += '</ul>';
+                errorMessage += 'Please remove these items from your cart and try again.';
+                errorMessage += '</div>';
+
+                // Insert the alert at the top of the checkout modal body
+                const checkoutModalBody = document.querySelector('#checkoutModal .modal-body');
+                if (checkoutModalBody) {
+                  // Remove any previous alert
+                  const prevAlert = checkoutModalBody.querySelector('.alert-danger');
+                  if (prevAlert) prevAlert.remove();
+                  checkoutModalBody.insertAdjacentHTML('afterbegin', errorMessage);
+                }
                 closeCheckout();
                 openCart();
                 return;
               }
               
-              if (result.validation.updatedPrices?.length > 0) {
-                let message = 'Some prices have changed:\n\n';
+                if (result.validation.updatedPrices?.length > 0) {
+                // Show Bootstrap alert-warning in the checkout modal
+                let warningHtml = `
+                  <div class="alert alert-warning" role="alert">
+                  <strong>Some prices have changed:</strong>
+                  <ul class="mb-2">
+                `;
                 result.validation.updatedPrices.forEach(item => {
-                  message += `- ${item.name}: ${formatRupiah(item.oldPrice)} → ${formatRupiah(item.newPrice)}\n`;
+                  warningHtml += `<li>${item.name}: ${formatRupiah(item.oldPrice)} &rarr; ${formatRupiah(item.newPrice)}</li>`;
                 });
+                warningHtml += `
+                  </ul>
+                  Please review and confirm to update your cart with the new prices.
+                  </div>
+                `;
+                // Insert the alert at the top of the checkout modal body
+                const checkoutModalBody = document.querySelector('#checkoutModal .modal-body');
+                if (checkoutModalBody) {
+                  // Remove any previous warning
+                  const prevWarning = checkoutModalBody.querySelector('.alert-warning');
+                  if (prevWarning) prevWarning.remove();
+                  checkoutModalBody.insertAdjacentHTML('afterbegin', warningHtml);
+                }
                 
                 if (confirm(message + '\n\nWould you like to update your cart with the new prices?')) {
                   // Update cart with new prices
