@@ -387,24 +387,6 @@
       </div>
     </div>
 
-    <!-- Add this after the navbar section -->
-    <div id="floatingSearch" class="floating-search-container">
-      <div class="container">
-        <form class="floating-search-form">
-          <input 
-            type="search" 
-            class="form-control me-2" 
-            id="floatingSearchInput" 
-            placeholder="Search products..." 
-            oninput="syncSearchFields(this.value)"
-          >
-          <button type="button" class="btn btn-outline-primary" onclick="closeFloatingSearch()">
-            <i class="bi bi-x"></i>
-          </button>
-        </form>
-      </div>
-    </div>
-
     <!-- Section-->
     <section class="py-5">
       <div class="container px-4 px-lg-5 mt-5">
@@ -1246,40 +1228,10 @@
         document.getElementById('floatingCartCount').textContent = count;
       }
 
-      function toggleSearchFocus() {
-        const floatingSearch = document.getElementById('floatingSearch');
-        floatingSearch.classList.add('show');
-        
-        setTimeout(() => {
-          document.getElementById('floatingSearchInput').focus();
-        }, 300);
-      }
-
-      function closeFloatingSearch() {
-        const floatingSearch = document.getElementById('floatingSearch');
-        floatingSearch.classList.remove('show');
-      }
-
       function syncSearchFields(value) {
-        // Sync the main search field with the floating one
         document.getElementById('search').value = value;
         filterProducts();
       }
-
-      // Add this to your JavaScript (near the bottom, before the closing script tag)
-      document.addEventListener('click', function(event) {
-        const floatingSearch = document.getElementById('floatingSearch');
-        const floatingSearchForm = document.querySelector('.floating-search-form');
-        const searchButton = document.querySelector('.floating-buttons .btn:first-child');
-        
-        // Check if the floating search is visible
-        if (floatingSearch.classList.contains('show')) {
-          // Check if click is outside the search form and not on the search button
-          if (!floatingSearchForm.contains(event.target) && event.target !== searchButton && !searchButton.contains(event.target)) {
-            closeFloatingSearch();
-          }
-        }
-      }, true);
 
       // Add this function after the addToCart function
       function changeQuantity(productId, change) {
