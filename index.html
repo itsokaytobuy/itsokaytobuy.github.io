@@ -924,67 +924,13 @@
       }
 
       function checkoutCart() {
-        validateCartProducts().then(isValid => {
-          if (!isValid) return;
-          
-          cartModal.hide();
-          
-          // Populate the checkout items and total
-          updateCheckoutSummary();
-          
-          // Show the checkout modal
-          checkoutModal.show();
-        });
-      }
-
-      async function validateCartProducts() {
-        try {
-          // Get product IDs from cart
-          const productIds = cart.map(item => item.id);
-          
-          // Fetch status only for cart items
-          const response = await fetch(
-            `${SCRIPT_URL}?action=validateCart&productIds=${JSON.stringify(productIds)}`
-          );
-          const result = await response.json();
-          
-          if (!result.success) {
-            throw new Error('Failed to validate products');
-          }
-          
-          // Check each cart item
-          const invalidItems = cart.filter(item => {
-            const status = result.data[item.id];
-            return !status || !status.active;
-          });
-          
-          if (invalidItems.length > 0) {
-            const itemNames = invalidItems
-              .map(item => result.data[item.id]?.name || item.name)
-              .join(', ');
-              
-            alert(`Sorry, the following items are no longer available: ${itemNames}`);
-            
-            // Remove invalid items from cart
-            cart = cart.filter(item => {
-              const status = result.data[item.id];
-              return status && status.active;
-            });
-            saveCart();
-            
-            // Close checkout modal and reopen cart
-            closeCheckout();
-            openCart();
-            
-            return false;
-          }
-          
-          return true;
-        } catch (error) {
-          console.error('Error validating products:', error);
-          alert('Unable to validate products. Please try again.');
-          return false;
-        }
+        cartModal.hide();
+        
+        // Populate the checkout items and total
+        updateCheckoutSummary();
+        
+        // Show the checkout modal
+        checkoutModal.show();
       }
 
       function updateCheckoutSummary() {
