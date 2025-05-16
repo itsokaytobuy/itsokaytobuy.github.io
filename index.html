@@ -1133,92 +1133,64 @@
       }
 
       // Update the checkout form submission handler
-      document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+      document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Get and format the phone number with country code
-        let phoneNumber = document.getElementById('custPhone').value.replace(/[^0-9]/g, '');
-        if (phoneNumber.startsWith('0')) {
-          phoneNumber = phoneNumber.substring(1);
+        // Show loading state
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+
+        try {
+          // Validate products before proceeding
+          const productIds = cart.map(item => item.id);
+          const response = await fetch(
+            `${SCRIPT_URL}?action=validateCart&productIds=${JSON.stringify(productIds)}`
+          );
+          const result = await response.json();
+          
+          if (!result.success) {
+            throw new Error('Failed to validate products');
+          }
+
+          // Check each cart item
+          const invalidItems = cart.filter(item => {
+            const status = result.data[item.id];
+            return !status || !status.active;
+          });
+
+          if (invalidItems.length > 0) {
+            const itemNames = invalidItems
+              .map(item => result.data[item.id]?.name || item.name)
+              .join(', ');
+            
+            alert(`Sorry, these items are no longer available: ${itemNames}\nPlease review your cart.`);
+            
+            // Remove invalid items from cart
+            cart = cart.filter(item => {
+              const status = result.data[item.id];
+              return status && status.active;
+            });
+            saveCart();
+            
+            // Close checkout modal and reopen cart
+            closeCheckout();
+            openCart();
+            return;
+          }
+
+          // Proceed with order submission
+          // ...existing order submission code...
+
+        } catch (error) {
+          console.error('Error processing order:', error);
+          alert('Unable to process your order. Please try again.');
+        } finally {
+          // Restore button state
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalText;
         }
-        phoneNumber = '+62' + phoneNumber;
-        
-        // Disable the submit button and show loading state
-        const submitBtn = document.getElementById('submitOrderBtn');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
-        
-        // Calculate total
-        const total = calculateCartTotal();
-        
-        // Generate the order ID here so we can use it in both places
-        const timestamp = Date.now().toString().slice(-6);
-        const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        const generatedOrderId = `IOKB-${timestamp}-${randomPart}`;
-        
-        // Get the selected shipping option
-        const shippingOption = document.querySelector('input[name="shippingOption"]:checked').value;
-        
-        // Prepare the order data
-        const orderData = {
-          customerName: document.getElementById('custName').value,
-          customerEmail: document.getElementById('custEmail').value,
-          customerPhone: phoneNumber, // Use the formatted phone number with country code
-          customerAddress: document.getElementById('custAddress').value,
-          paymentMethod: 'bank_transfer',
-          shippingOption: shippingOption,
-          cartItems: cart,
-          total: total,
-          downPayment: paidNow,
-          uniqueCode: uniqueCode,
-          orderId: generatedOrderId // Add the order ID to the data
-        };
-        
-        // Show the submission is in progress
-        showToast("Submitting your order...");
-        
-        // Use fetch with form-urlencoded data
-        const formData = new URLSearchParams();
-        formData.append('customerName', orderData.customerName);
-        formData.append('customerEmail', orderData.customerEmail);
-        formData.append('customerPhone', orderData.customerPhone);
-        formData.append('customerAddress', orderData.customerAddress);
-        formData.append('paymentMethod', orderData.paymentMethod);
-        formData.append('shippingOption', orderData.shippingOption);
-        formData.append('cartData', JSON.stringify(orderData.cartItems));
-        formData.append('total', orderData.total);
-        formData.append('downPayment', orderData.downPayment);
-        formData.append('uniqueCode', orderData.uniqueCode);
-        formData.append('orderId', generatedOrderId); // Pass the order ID to the backend
-        
-        fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: formData,
-          mode: 'no-cors' // Important: Use no-cors mode
-        })
-        .then(() => {
-          // Since no-cors mode doesn't give us response data, we'll just assume success
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-          
-          // Close checkout modal
-          checkoutModal.hide();
-          
-          // Use the same order ID for the confirmation
-          showOrderConfirmation(generatedOrderId, total, 'bank_transfer', shippingOption);
-          
-          // Clear the cart
-          clearCart();
-        })
-        .catch(error => {
-          // Re-enable the submit button
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-          
-          console.error('Request failed:', error);
-          alert('Failed to submit order. Please try again later.');
-        });
       });
 
       function showOrderConfirmation(orderId, total, paymentMethod, shippingOption) {
