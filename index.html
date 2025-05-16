@@ -133,7 +133,7 @@
         left: 0;
         width: 100%;
         background-color: var(--bs-body-bg);
-          padding: 1rem;
+        padding: 1rem;
         z-index: 1040;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         transform: translateY(-100%);
@@ -145,7 +145,7 @@
       }
       
       .floating-search-form {
-          display: flex;
+        display: flex;
         width: 100%;
       }
       
@@ -445,7 +445,7 @@
       <button class="btn btn-primary rounded-circle" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch" title="Search Products">
         <i class="bi bi-search fs-4"></i>
       </button>
-      <button class="btn btn-primary rounded-circle" onclick="openCart()" title="View Cart">
+      <button class="btn btn-primary rounded-circle" onclick="openCart()" title="View Cart" aria-label="View Cart">
         <i class="bi bi-cart fs-4"></i>
         <span class="badge bg-primary text-white rounded-pill" id="floatingCartCount">0</span>
       </button>
