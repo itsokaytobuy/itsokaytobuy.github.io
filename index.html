@@ -598,6 +598,27 @@
       </div>
     </div>
 
+    <!-- Price Update Modal -->
+    <div class="modal fade" id="priceUpdateModal" tabindex="-1" aria-labelledby="priceUpdateModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="priceUpdateModalLabel">Price Updates</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>The following prices have changed:</p>
+            <ul id="priceUpdateBody"></ul>
+            <p>Would you like to update your cart with the new prices?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="priceUpdateConfirmBtn">Update Prices</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer-->
     <footer class="py-5 bg-primary">
       <div class="container"><p class="m-0 text-center text-white">Copyright &copy; ItsOkaytoBuy 2023-2025</p></div>
@@ -1171,12 +1192,18 @@
                 }
 
                 // Wait for user confirmation
-                const userConfirmed = confirm(
-                  'Some prices have changed. Would you like to update your cart with the new prices?'
-                );
+                // Show a custom modal for price updates
+                const priceUpdateModal = new bootstrap.Modal(document.getElementById('priceUpdateModal'));
+                const priceUpdateBody = document.getElementById('priceUpdateBody');
+                const priceUpdateConfirmBtn = document.getElementById('priceUpdateConfirmBtn');
 
-                if (userConfirmed) {
-                  // Update cart with new prices
+                // Populate the modal with updated prices
+                priceUpdateBody.innerHTML = result.validation.updatedPrices.map(item => `
+                  <li>${item.name}: ${formatRupiah(item.oldPrice)} → ${formatRupiah(item.newPrice)}</li>
+                `).join('');
+
+                // Add event listener for confirmation
+                priceUpdateConfirmBtn.onclick = () => {
                   result.validation.updatedPrices.forEach(item => {
                     const cartItem = cart.find(i => i.id === item.id);
                     if (cartItem) {
@@ -1186,7 +1213,11 @@
                   saveCart();
                   closeCheckout();
                   openCart();
-                }
+                  priceUpdateModal.hide();
+                };
+
+                // Show the modal
+                priceUpdateModal.show();
 
                 // If the user cancels, do nothing and keep the modal open
                 return;
