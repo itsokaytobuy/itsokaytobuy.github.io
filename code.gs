@@ -264,16 +264,25 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
     ensureSheetsExist();
     
     const sheet = getSpreadsheet().getSheetByName("Orders");
-    sheet.appendRow([
-      orderId,
-      customerId,
-      orderDate,
-      total,
-      status,
-      dp,
-      paymentMethod,
-      shippingOption
-    ]);
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    
+    // Create an object mapping column names to values
+    const orderData = {
+      'orderId': orderId,
+      'customerId': customerId,
+      'date': orderDate,
+      'total': total,
+      'status': status,
+      'downPayment': dp,
+      'paymentMethod': paymentMethod,
+      'shippingOption': shippingOption
+    };
+
+    // Create array matching header order
+    const rowData = headers.map(header => orderData[header] || '');
+    
+    // Append the row
+    sheet.appendRow(rowData);
     
     return true;
   } catch (error) {
@@ -289,19 +298,26 @@ function saveOrderItems(orderItems, orderId) {
     ensureSheetsExist();
     
     const sheet = getSpreadsheet().getSheetByName("OrderItems");
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     
-    // Add each order item as a new row
+    // Process each order item
     orderItems.forEach((item, index) => {
-      // Create a simpler order item ID that includes the order ID
       const orderItemId = `${orderId}-item-${index + 1}`;
       
-      sheet.appendRow([
-        orderItemId,
-        orderId,
-        item.productId,
-        item.quantity,
-        item.price
-      ]);
+      // Create an object mapping column names to values
+      const itemData = {
+        'orderItemId': orderItemId,
+        'orderId': orderId,
+        'productId': item.productId,
+        'quantity': item.quantity,
+        'price': item.price
+      };
+
+      // Create array matching header order
+      const rowData = headers.map(header => itemData[header] || '');
+      
+      // Append the row
+      sheet.appendRow(rowData);
     });
     
     return true;
