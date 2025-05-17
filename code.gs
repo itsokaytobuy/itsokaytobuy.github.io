@@ -19,13 +19,13 @@ function ensureSheetsExist() {
   // Check for Customers sheet
   if (!ss.getSheetByName("Customers")) {
     const customersSheet = ss.insertSheet("Customers");
-    customersSheet.appendRow(["customerId", "name", "email", "phone", "address", "date"]);
+    customersSheet.appendRow(["customerId", "name", "email", "phone", "address", "lastOrder"]);
   }
   
   // Check for Orders sheet
   if (!ss.getSheetByName("Orders")) {
     const ordersSheet = ss.insertSheet("Orders");
-    ordersSheet.appendRow(["orderId", "customerId", "date", "total", "status", "downPayment", "paymentMethod", "shippingOption"]);
+    ordersSheet.appendRow(["orderId", "customerId", "date", "total", "status", "downPayment", "paymentMethod", "shippingOption", "shippingAddress"]);
   }
   
   // Check for OrderItems sheet
@@ -194,71 +194,68 @@ function generateCustomerId(name, phone) {
 // Find existing customer or create a new one
 function findOrCreateCustomer(customerId, name, email, phone, address) {
   try {
-    // Ensure sheets exist
     ensureSheetsExist();
-    
     const sheet = getSpreadsheet().getSheetByName("Customers");
     const data = sheet.getDataRange().getValues();
     
-    // Check if header row exists
+    // Add header if sheet is empty
     if (data.length < 1) {
-      sheet.appendRow(["customerId", "name", "email", "phone", "address", "date"]);
-      data.push(["customerId", "name", "email", "phone", "address", "date"]);
+      sheet.appendRow(["customerId", "name", "email", "phone", "address", "lastOrder"]);
+      data.push(["customerId", "name", "email", "phone", "address", "lastOrder"]);
     }
     
+    // Get column indexes from header
     const header = data[0];
-    const customerIdIndex = header.indexOf("customerId");
-    const addressIndex = header.indexOf("address");
-    const dateIndex = header.indexOf("date");
+    const columns = {
+      customerId: header.indexOf("customerId"),
+      name: header.indexOf("name"),
+      email: header.indexOf("email"),
+      phone: header.indexOf("phone"),
+      address: header.indexOf("address"),
+      lastOrder: header.indexOf("lastOrder")
+    };
     
-    // Make sure required columns exist
-    if (customerIdIndex === -1) {
-      throw new Error("customerId column not found in Customers sheet");
+    // Validate required columns
+    if (columns.customerId === -1) {
+      throw new Error("customerId column not found");
     }
 
-    let customerRowIndex = -1;
-    
-    // Search for existing customer by customerId only
+    // Search for existing customer
     for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (row[customerIdIndex] === customerId) {
-        customerRowIndex = i + 1;
-        break;
+      if (data[i][columns.customerId] === customerId) {
+        // Create row data array based on column positions
+        const rowData = new Array(header.length).fill("");
+        rowData[columns.lastOrder] = new Date();
+        rowData[columns.address] = address;
+        
+        // Update only date and address
+        sheet.getRange(i + 1, columns.lastOrder + 1).setValue(new Date());
+        sheet.getRange(i + 1, columns.address + 1).setValue(address);
+        return true;
       }
-    }
-
-    // If customer found, only update address and date
-    if (customerRowIndex > 0) {
-      // Update only address
-      if (addressIndex !== -1) {
-        sheet.getRange(customerRowIndex, addressIndex + 1).setValue(address);
-      }
-      // Update date
-      if (dateIndex !== -1) {
-        sheet.getRange(customerRowIndex, dateIndex + 1).setValue(new Date());
-      }
-      return true;
     }
     
-    // If customer not found, create new entry with all details
-    sheet.appendRow([
-      customerId,
-      name,
-      email,
-      phone,
-      address,
-      new Date()
-    ]);
+    // If customer not found, create new entry using column positions
+    const newRowData = new Array(header.length).fill("");
+    newRowData[columns.customerId] = customerId;
+    newRowData[columns.name] = name;
+    newRowData[columns.email] = email;
+    newRowData[columns.phone] = phone;
+    newRowData[columns.address] = address;
+    newRowData[columns.lastOrder] = new Date();
+    
+    sheet.appendRow(newRowData);
     return false;
 
   } catch (error) {
     console.error("Error in findOrCreateCustomer:", error);
+    console.error("Stack:", error.stack);
     return false;
   }
 }
 
 // Save order data to spreadsheet
-function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMethod, shippingOption) {
+function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMethod, shippingOption, shippingAddress) {
   try {
     const sheet = getSpreadsheet().getSheetByName("Orders");
     const header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -273,6 +270,7 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
       downPayment: header.indexOf("downPayment"),
       paymentMethod: header.indexOf("paymentMethod"),
       shippingOption: header.indexOf("shippingOption")
+      shippingAddress: header.indexOf("shippingAddress")
     };
     
     // Validate required columns exist
@@ -293,6 +291,7 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
     rowData[columns.downPayment] = dp;
     rowData[columns.paymentMethod] = paymentMethod;
     rowData[columns.shippingOption] = shippingOption;
+    rowData[columns.shippingAddress] = shippingAddress;
     
     sheet.appendRow(rowData);
     return true;
@@ -442,6 +441,7 @@ function doPost(e) {
       downPayment,
       paymentMethod,
       shippingOption
+      customerAddress
     );
     
     // Prepare order items - no need to generate UUIDs anymore
