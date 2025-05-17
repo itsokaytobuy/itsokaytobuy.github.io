@@ -493,8 +493,8 @@
                       <span id="checkoutUniqueCode"></span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center fw-bold mt-2">
-                      <span>Paid Now:</span>
-                      <span id="checkoutPaidNow"></span>
+                      <span style="font-size: 1.2rem; font-weight: 700;">Paid Now:</span>
+                      <span id="checkoutPaidNow" style="font-size: 1.2rem; font-weight: 700;">${formatRupiah(paidNow)}</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center text-muted small mt-2">
                       <span>Shipping:</span>
@@ -1170,11 +1170,20 @@
       function showOrderConfirmation(orderId, total, paymentMethod, shippingOption) {
         // Set order details in confirmation modal
         document.getElementById('confirmOrderId').textContent = orderId || 'Generated on server';
-        document.getElementById('confirmOrderDate').textContent = new Date().toLocaleString();
-        document.getElementById('confirmOrderTotal').textContent = formatRupiah(total);
         
-        // Get customer name for WhatsApp message
-        const customerName = document.getElementById('custName').value;
+        // Format date in UTC+7
+        const now = new Date();
+        const utc7Date = new Date(now.getTime() + (7 * 60 * 60 * 1000)).toLocaleString('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        document.getElementById('confirmOrderDate').textContent = utc7Date;
+        
+        document.getElementById('confirmOrderTotal').textContent = formatRupiah(total);
         
         // Set payment instructions based on payment method
         const paymentInstructions = document.getElementById('paymentInstructions');
@@ -1191,7 +1200,7 @@
               </div>
               <p class="mb-1">Shipping Option: <strong>${shippingOption}</strong></p>
               <p class="mb-2">Please send the payment confirmation to our WhatsApp:</p>
-              <a href="https://wa.me/+6285878024607?text=${encodeURIComponent(`Hai kak, order saya ${customerName} nomor ${orderId} sudah dibayar ya, berikut bukti transfernya`)}" 
+              <a href="https://wa.me/+6285878024607?text=${encodeURIComponent(`Hai kak, order saya atas nama ${document.getElementById('custName').value} nomor ${orderId} sudah dibayar ya, berikut bukti transfernya`)}" 
                 class="btn btn-success btn-lg w-100" 
                 target="_blank">
                 <i class="bi bi-whatsapp me-2"></i> Send Payment Confirmation
