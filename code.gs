@@ -223,26 +223,28 @@ function findOrCreateCustomer(customerId, name, email, phone, address) {
     // Search for existing customer
     for (let i = 1; i < data.length; i++) {
       if (data[i][columns.customerId] === customerId) {
-        // Create row data array based on column positions
-        const rowData = new Array(header.length).fill("");
-        rowData[columns.lastOrder] = new Date();
-        rowData[columns.address] = address;
+        // Create UTC+7 date
+        const now = new Date();
+        const utc7Date = Utilities.formatDate(now, "GMT+7", "yyyy-MM-dd HH:mm:ss");
         
         // Update only date and address
-        sheet.getRange(i + 1, columns.lastOrder + 1).setValue(new Date());
+        sheet.getRange(i + 1, columns.lastOrder + 1).setValue(utc7Date);
         sheet.getRange(i + 1, columns.address + 1).setValue(address);
         return true;
       }
     }
     
-    // If customer not found, create new entry using column positions
+    // If customer not found, create new entry
+    const now = new Date();
+    const utc7Date = Utilities.formatDate(now, "GMT+7", "yyyy-MM-dd HH:mm:ss");
+    
     const newRowData = new Array(header.length).fill("");
     newRowData[columns.customerId] = customerId;
     newRowData[columns.name] = name;
     newRowData[columns.email] = email;
     newRowData[columns.phone] = phone;
     newRowData[columns.address] = address;
-    newRowData[columns.lastOrder] = new Date();
+    newRowData[columns.lastOrder] = utc7Date;
     
     sheet.appendRow(newRowData);
     return false;
@@ -269,7 +271,7 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
       status: header.indexOf("status"),
       downPayment: header.indexOf("downPayment"),
       paymentMethod: header.indexOf("paymentMethod"),
-      shippingOption: header.indexOf("shippingOption")
+      shippingOption: header.indexOf("shippingOption"),
       shippingAddress: header.indexOf("shippingAddress")
     };
     
@@ -281,11 +283,14 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
       }
     }
     
+    // Convert orderDate to UTC+7
+    const utc7Date = Utilities.formatDate(orderDate, "GMT+7", "yyyy-MM-dd HH:mm:ss");
+    
     // Create row data array matching column order in sheet
     const rowData = new Array(header.length).fill("");
     rowData[columns.orderId] = orderId;
     rowData[columns.customerId] = customerId;
-    rowData[columns.date] = orderDate;
+    rowData[columns.date] = utc7Date;
     rowData[columns.total] = total;
     rowData[columns.status] = status;
     rowData[columns.downPayment] = dp;
@@ -440,7 +445,7 @@ function doPost(e) {
       "Pending",
       downPayment,
       paymentMethod,
-      shippingOption
+      shippingOption,
       customerAddress
     );
     
