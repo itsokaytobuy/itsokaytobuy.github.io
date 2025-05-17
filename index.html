@@ -86,6 +86,19 @@
         z-index: 1;
       }
       
+      /* Remove spinner arrows from number input */
+      .quantity-control input[type="number"]::-webkit-inner-spin-button,
+      .quantity-control input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+        margin: 0;
+      }
+      
+      .quantity-control input[type="number"] {
+        -moz-appearance: textfield; /* Firefox */
+        appearance: textfield; /* Standard property */
+      }
+      
       /* Card image consistent height */
       .card-img-top {
         height: 200px;
@@ -681,19 +694,21 @@
                   </div>
                   <!-- Product actions-->
                   <div class="card-footer p-2 border-top-0 bg-transparent">
-                    <div class="quantity-control input-group" style="max-width: 90px;">
+                    <div class="quantity-control input-group">
                       <button class="btn btn-outline-primary btn-sm" 
                         onclick="changeQuantity('${p.id}', -1)" 
                         type="button">
                         <i class="bi bi-dash"></i>
                       </button>
                       <input type="number" 
-                        min="1" 
+                        min="1"
+                        max="99"
                         value="1" 
                         id="qty-${p.id}" 
                         class="form-control" 
                         inputmode="numeric"
                         pattern="[0-9]*"
+                        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                       />
                       <button class="btn btn-outline-primary btn-sm" 
                         onclick="changeQuantity('${p.id}', 1)" 
@@ -740,12 +755,14 @@
                           <i class="bi bi-dash"></i>
                         </button>
                         <input type="number" 
-                          min="1" 
+                          min="1"
+                          max="99"
                           value="1" 
                           id="qty-${p.id}" 
                           class="form-control" 
                           inputmode="numeric"
                           pattern="[0-9]*"
+                          onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                         />
                         <button class="btn btn-outline-primary" 
                           onclick="changeQuantity('${p.id}', 1)" 
@@ -1250,16 +1267,36 @@
         filterProducts();
       }
 
-      // Add this function after the addToCart function
       function changeQuantity(productId, change) {
         const qtyInput = document.getElementById(`qty-${productId}`);
         let newValue = parseInt(qtyInput.value) + change;
         
-        // Ensure minimum value is 1
-        if (newValue < 1) newValue = 1;
+        // Validate and set bounds
+        newValue = validateQuantity(newValue);
         
         qtyInput.value = newValue;
       }
+
+      function validateQuantity(value) {
+        // Convert to number and handle NaN
+        value = parseInt(value) || 0;
+        
+        // Set bounds
+        const MIN_QTY = 1;
+        const MAX_QTY = 99;
+        
+        // Clamp between min and max
+        return Math.min(Math.max(value, MIN_QTY), MAX_QTY);
+      }
+
+      // Add input event handler to quantity fields
+      document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('input', function(e) {
+          if (e.target.matches('.quantity-control input[type="number"]')) {
+            e.target.value = validateQuantity(e.target.value);
+          }
+        });
+      });
 
       /* Add this function to your JavaScript */
       function applySmallScreenLayout() {
