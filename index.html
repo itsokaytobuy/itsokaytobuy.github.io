@@ -332,6 +332,26 @@
           position: static;
         }
       }
+
+      header.bg-primary {
+        background-image: url('https://imghost.net/ib/WotXqWp3dgyIn5W_1747551229.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: relative;
+      }
+      /* Optional: add a dark overlay for better text contrast */
+      header.bg-primary::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(33, 37, 41, 0.5); /* semi-transparent dark overlay */
+        z-index: 0;
+      }
+      header.bg-primary > .container {
+        position: relative;
+        z-index: 1;
+      }
     </style>
   </head>
   <body>
@@ -340,7 +360,7 @@
       <div class="container px-4 px-lg-5 my-5">
         <div class="text-center text-white">
           <h1 class="display-4 fw-bolder">Daftar Produk</h1>
-          <p class="lead fw-normal text-white-50 mb-0">Find what you love</p>
+          <p class="lead fw-normal text-white mb-0">Find what you love</p>
         </div>
       </div>
     </header>
