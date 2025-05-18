@@ -613,7 +613,7 @@
           <div class="modal-body">
             <div class="text-center mb-4">
               <i class="bi bi-check-circle-fill text-primary" style="font-size: 4rem;"></i>
-              <h4 class="mt-3">Thank You For Your Order</h4>
+              <h4 class="mt-3">Thank You for Your Order!</h4>
               <p class="text-muted">Your order has been received and is being processed.</p>
             </div>
             
@@ -1251,7 +1251,11 @@
               <p class="mb-2">Please transfer the down payment of <strong style="font-size: 1.1rem;">${formatRupiah(paidNow)}</strong> (50% of total) to:</p>
               <div class="bg-light p-3 rounded border mb-3 text-dark" style="user-select: text; -webkit-user-select: text;">
                 <p class="mb-2"><strong>Bank:</strong> BANK JAGO</p>
-                <p class="mb-2"><strong>Account Number:</strong> <span style="font-size: 1.2rem; font-weight: 600;">105801321294</span></p>
+                <p class="mb-2"><strong>Account Number:</strong>
+                <span style="font-size: 1.2rem; font-weight: 600;" id="bankAccountNumber">105801321294</span>
+                <button class="btn btn-outline-secondary btn-sm ms-2" onclick="copyBankAccount()" title="Copy account number">
+                  <i class="bi bi-clipboard"></i>
+                </button> </p>
                 <p class="mb-0"><strong>Account Name:</strong> <span style="font-size: 1.1rem;">Galuh Ajeng Prabeswari</span></p>
               </div>
               <p class="mb-1">Shipping Option: <strong>${shippingOption}</strong></p>
@@ -1510,6 +1514,15 @@
         document.body.appendChild(script);
       });
     }
+
+      function copyBankAccount() {
+        const acc = document.getElementById('bankAccountNumber');
+        if (acc) {
+          navigator.clipboard.writeText(acc.textContent.trim()).then(() => {
+            showToast('Account number copied!');
+          });
+        }
+      }
     </script>
   </body>
 </html>
