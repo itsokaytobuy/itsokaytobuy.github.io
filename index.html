@@ -492,9 +492,9 @@
                       <span>Unique code:</span>
                       <span id="checkoutUniqueCode"></span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center fw-bold mt-2">
+                    <div class="d-flex justify-content-between align-items-center fw-bold mt-2" style="font-size: 1.2rem;">
                       <span>Paid Now:</span>
-                      <span id="checkoutPaidNow"></span>
+                      <span id="checkoutPaidNow" class="fw-bolder" style="font-size: 1.2rem;"></span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center text-muted small mt-2">
                       <span>Shipping:</span>
@@ -1254,7 +1254,9 @@
       function updateCartCount() {
         const count = cart.reduce((total, item) => total + item.quantity, 0);
         document.getElementById('cartCount').textContent = count;
+        document.getElementById('cartCount').style.display = count > 0 ? 'block' : 'none';
         document.getElementById('floatingCartCount').textContent = count;
+        document.getElementById('floatingCartCount').style.display = count > 0 ? 'block' : 'none';
       }
 
       function syncSearchFields(value) {
