@@ -139,6 +139,49 @@ function getProducts() {
   }
 }
 
+// Validate products based on their IDs
+function validateProducts(productIds) {
+  try {
+    const sheet = getSpreadsheet().getSheetByName("Products");
+    const data = sheet.getDataRange().getValues();
+    const header = data[0];
+    
+    const idIndex = header.indexOf("id");
+    const activeIndex = header.indexOf("active");
+    const nameIndex = header.indexOf("name");
+    
+    if (idIndex === -1 || activeIndex === -1 || nameIndex === -1) {
+      return { error: "Required columns missing" };
+    }
+    
+    const inactiveProducts = [];
+    
+    productIds.forEach(pid => {
+      for (let i = 1; i < data.length; i++) {
+        if (data[i][idIndex] === pid) {
+          const isActive = data[i][activeIndex] === true || 
+                          data[i][activeIndex] === "true" || 
+                          data[i][activeIndex] === "yes" || 
+                          data[i][activeIndex] === "YES";
+          
+          if (!isActive) {
+            inactiveProducts.push({
+              id: pid,
+              name: data[i][nameIndex]
+            });
+          }
+          break;
+        }
+      }
+    });
+    
+    return { inactiveProducts };
+    
+  } catch (error) {
+    return { error: error.toString() };
+  }
+}
+
 // Format image URL function that works with any image URL
 function formatImageUrl(url) {
   // Check if URL is empty or undefined
@@ -365,6 +408,19 @@ function doGet(e) {
     }
   }
   
+  if (action === 'validateProducts') {
+    const productIds = e.parameter.productIds ? JSON.parse(e.parameter.productIds) : [];
+    const result = validateProducts(productIds);
+    
+    if (callback) {
+      return ContentService.createTextOutput(`${callback}(${JSON.stringify(result)})`)
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
   // Test API connectivity
   if (action === 'test') {
     // Ensure sheets exist during test
