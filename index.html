@@ -1419,6 +1419,17 @@
             const modalBody = document.querySelector('#checkoutModal .modal-body');
             modalBody.insertBefore(alertDiv, modalBody.firstChild);
             
+            // Scroll the modal to the top to show the alert
+            modalBody.scrollTop = 0;
+            
+            // Add smooth scrolling animation for better UX
+            setTimeout(() => {
+              modalBody.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+              });
+            }, 100);
+
             reject(new Error('Inactive products found'));
             return;
           }
