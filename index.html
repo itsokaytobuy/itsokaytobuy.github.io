@@ -321,27 +321,6 @@
       #paymentInstructions .bg-white {
         background-color: var(--bs-body-bg) !important;
       }
-
-      @media (min-width: 992px) {
-        .fixed-desktop {
-          position: fixed !important;
-          top: 0;
-          left: 0;
-          right: 0;
-          z-index: 1040;
-        }
-        body {
-          padding-top: 54px; /* Adjust this value to match your navbar height */
-        }
-      }
-      @media (max-width: 991.98px) {
-        .fixed-desktop {
-          position: static !important;
-        }
-        body {
-          padding-top: 0 !important;
-        }
-      }
     </style>
   </head>
   <body>
@@ -356,7 +335,7 @@
     </header>
 
     <!-- Navigation-->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-desktop">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
       <div class="container px-4 px-lg-5">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
