@@ -86,6 +86,19 @@
         z-index: 1;
       }
       
+      /* Remove spinner arrows from number input */
+      .quantity-control input[type="number"]::-webkit-inner-spin-button,
+      .quantity-control input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+        margin: 0;
+      }
+
+      .quantity-control input[type="number"] {
+        -moz-appearance: textfield; /* Firefox */
+        appearance: textfield; /* Standard property */
+      }
+      
       /* Card image consistent height */
       .card-img-top {
         height: 200px;
