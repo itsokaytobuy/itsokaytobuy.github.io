@@ -1419,16 +1419,33 @@
             const modalBody = document.querySelector('#checkoutModal .modal-body');
             modalBody.insertBefore(alertDiv, modalBody.firstChild);
             
-            // Scroll the modal to the top to show the alert
-            modalBody.scrollTop = 0;
-            
-            // Add smooth scrolling animation for better UX
-            setTimeout(() => {
-              modalBody.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-              });
-            }, 100);
+       // Force scroll to top using multiple methods for better compatibility
+        setTimeout(() => {
+          // Method 1: Scroll modal body
+          modalBody.scrollTop = 0;
+          
+          // Method 2: Scroll modal dialog
+          const modalDialog = document.querySelector('#checkoutModal .modal-dialog');
+          if (modalDialog) modalDialog.scrollTop = 0;
+          
+          // Method 3: Scroll modal itself
+          const modal = document.querySelector('#checkoutModal');
+          if (modal) modal.scrollTop = 0;
+          
+          // Method 4: Scroll window to modal top
+          const modalRect = modal.getBoundingClientRect();
+          window.scrollTo({
+            top: window.scrollY + modalRect.top,
+            behavior: 'smooth'
+          });
+          
+          // Method 5: Force layout recalculation
+          modalBody.style.display = 'none';
+          void modalBody.offsetHeight;
+          modalBody.style.display = '';
+          
+        }, 100);
+
 
             reject(new Error('Inactive products found'));
             return;
