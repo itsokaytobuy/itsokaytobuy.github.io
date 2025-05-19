@@ -956,6 +956,13 @@
         cartModal.hide();
       }
 
+      function clearCartAfterConfirmation() {
+        cart = [];
+        localStorage.removeItem("cart");
+        updateCartCount();
+      }
+
+
       function clearCart() {
         cart = [];
         localStorage.removeItem("cart");
@@ -1200,7 +1207,7 @@
           submitBtn.innerHTML = originalBtnText;
           checkoutModal.hide();
           showOrderConfirmation(generatedOrderId, total, 'bank_transfer', shippingOption);
-          clearCart();
+          clearCartAfterConfirmation();
           delete window[callbackName];
           document.body.removeChild(script);
         };
