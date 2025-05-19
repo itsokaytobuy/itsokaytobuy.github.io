@@ -1193,47 +1193,35 @@
         // Show the submission is in progress
         showToast("Submitting your order...");
         
-        // Use fetch with form-urlencoded data
-        const formData = new URLSearchParams();
-        formData.append('customerName', orderData.customerName);
-        formData.append('customerEmail', orderData.customerEmail);
-        formData.append('customerPhone', orderData.customerPhone);
-        formData.append('customerAddress', orderData.customerAddress);
-        formData.append('paymentMethod', orderData.paymentMethod);
-        formData.append('shippingOption', orderData.shippingOption);
-        formData.append('cartData', JSON.stringify(orderData.cartItems));
-        formData.append('total', orderData.total);
-        formData.append('downPayment', orderData.downPayment);
-        formData.append('uniqueCode', orderData.uniqueCode);
-        formData.append('orderId', generatedOrderId); // Pass the order ID to the backend
-        
-        fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: formData,
-          mode: 'no-cors' // Important: Use no-cors mode
-        })
-        .then(() => {
-          // Since no-cors mode doesn't give us response data, we'll just assume success
+        // Use JSONP for submission
+        const callbackName = 'orderSubmitCallback_' + Date.now();
+        window[callbackName] = function(response) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalBtnText;
-          
-          // Close checkout modal
           checkoutModal.hide();
-          
-          // Use the same order ID for the confirmation
           showOrderConfirmation(generatedOrderId, total, 'bank_transfer', shippingOption);
-          
-          // Clear the cart
           clearCart();
-        })
-        .catch(error => {
-          // Re-enable the submit button
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
-          
-          console.error('Request failed:', error);
-          alert('Failed to submit order. Please try again later.');
+          delete window[callbackName];
+          document.body.removeChild(script);
+        };
+        const script = document.createElement('script');
+        const params = new URLSearchParams({
+          action: 'submitOrder',
+          customerName: orderData.customerName,
+          customerEmail: orderData.customerEmail,
+          customerPhone: orderData.customerPhone,
+          customerAddress: orderData.customerAddress,
+          paymentMethod: orderData.paymentMethod,
+          shippingOption: orderData.shippingOption,
+          cartData: JSON.stringify(orderData.cartItems),
+          total: orderData.total,
+          downPayment: orderData.downPayment,
+          uniqueCode: orderData.uniqueCode,
+          orderId: generatedOrderId,
+          callback: callbackName
         });
+        script.src = `${SCRIPT_URL}?${params.toString()}`;
+        document.body.appendChild(script);
       });
 
       function showOrderConfirmation(orderId, total, paymentMethod, shippingOption) {

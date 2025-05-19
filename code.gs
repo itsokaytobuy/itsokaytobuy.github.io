@@ -13,7 +13,7 @@ function ensureSheetsExist() {
   // Check for Products sheet
   if (!ss.getSheetByName("Products")) {
     const productsSheet = ss.insertSheet("Products");
-    productsSheet.appendRow(["id", "name", "category", "price", "imgUrl", "desc", "active"]);
+    productsSheet.appendRow(["productId", "name", "category", "price", "imgUrl", "desc", "active"]);
   }
   
   // Check for Customers sheet
@@ -53,7 +53,7 @@ function getProducts() {
     const products = [];
     
     // Find column indexes
-    const idIndex = header.indexOf("id");
+    const idIndex = header.indexOf("productId");
     const nameIndex = header.indexOf("name");
     const priceIndex = header.indexOf("price");
     const imgUrlIndex = header.indexOf("imgUrl");
@@ -146,7 +146,7 @@ function validateProducts(productIds) {
     const data = sheet.getDataRange().getValues();
     const header = data[0];
     
-    const idIndex = header.indexOf("id");
+    const idIndex = header.indexOf("productId");
     const activeIndex = header.indexOf("active");
     const nameIndex = header.indexOf("name");
     
@@ -417,6 +417,64 @@ function doGet(e) {
         .setMimeType(ContentService.MimeType.JAVASCRIPT);
     } else {
       return ContentService.createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  if (action === 'submitOrder') {
+    // Parse parameters
+    const customerName = e.parameter.customerName;
+    const customerEmail = e.parameter.customerEmail;
+    const customerPhone = e.parameter.customerPhone;
+    const customerAddress = e.parameter.customerAddress;
+    const paymentMethod = e.parameter.paymentMethod;
+    const shippingOption = e.parameter.shippingOption || "Standard";
+    const cart = e.parameter.cartData ? JSON.parse(e.parameter.cartData) : [];
+    const total = parseFloat(e.parameter.total) || 0;
+    const downPayment = parseFloat(e.parameter.downPayment) || 0;
+    const uniqueCode = parseInt(e.parameter.uniqueCode) || 0;
+    const orderId = e.parameter.orderId || ('ORD-' + new Date().getTime().toString().slice(-6));
+    const customerId = generateCustomerId(customerName, customerPhone);
+
+    findOrCreateCustomer(customerId, customerName, customerEmail, customerPhone, customerAddress);
+
+    const calculatedTotal = total || cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const date = new Date();
+
+    saveOrder(
+      customerId,
+      orderId,
+      date,
+      calculatedTotal,
+      "Pending",
+      downPayment,
+      paymentMethod,
+      shippingOption,
+      customerAddress
+    );
+
+    const orderItems = cart.map(item => ({
+      productId: item.id,
+      quantity: item.quantity,
+      price: item.price
+    }));
+
+    saveOrderItems(orderItems, orderId);
+
+    const responseData = {
+      success: true,
+      orderId: orderId,
+      total: calculatedTotal,
+      downPayment: downPayment,
+      uniqueCode: uniqueCode,
+      paymentMethod: paymentMethod
+    };
+
+    if (callback) {
+      return ContentService.createTextOutput(`${callback}(${JSON.stringify(responseData)})`)
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify(responseData))
         .setMimeType(ContentService.MimeType.JSON);
     }
   }
