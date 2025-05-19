@@ -960,6 +960,7 @@
         cart = [];
         localStorage.removeItem("cart");
         updateCartCount();
+        openCart(); // <-- Add this line to refresh the modal content
       }
 
       function showToast(message) {
