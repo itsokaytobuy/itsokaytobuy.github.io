@@ -1142,7 +1142,13 @@
         // Clear any existing alerts
          const existingAlerts = this.querySelectorAll('.alert');
          existingAlerts.forEach(alert => alert.remove());
-        
+
+        // Disable the submit button and show loading state
+        const submitBtn = document.getElementById('submitOrderBtn');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
+         
         // Validate the submitted products
         try {
           await validateCartProducts();
@@ -1157,13 +1163,7 @@
           phoneNumber = phoneNumber.substring(1);
         }
         phoneNumber = '+62' + phoneNumber;
-        
-        // Disable the submit button and show loading state
-        const submitBtn = document.getElementById('submitOrderBtn');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
-        
+               
         // Calculate total
         const total = calculateCartTotal();
         
