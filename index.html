@@ -436,6 +436,16 @@
     <!-- Section-->
     <section class="py-5">
       <div class="container-fluid px-2 px-md-3 mt-5">
+        <!-- Sort menu row -->
+        <div class="d-flex justify-content-end align-items-center mb-3">
+          <select class="form-select w-auto ms-auto" id="sortSelect" style="min-width:180px" onchange="sortProducts(this.value)">
+            <option value="">No sort</option>
+            <option value="priceAsc">Price: Low to High</option>
+            <option value="priceDesc">Price: High to Low</option>
+            <option value="nameAsc">Name: A to Z</option>
+            <option value="nameDesc">Name: Z to A</option>
+            </select>
+        </div>
         <div class="row">
           <!-- Sidebar and mobile category dropdown as before -->
           <aside class="col-md-3 mb-4 d-none d-md-block">
@@ -447,16 +457,6 @@
             </div>
           </aside>
           <div class="col-md-9">
-            <!-- Sort menu row -->
-            <div class="d-flex justify-content-end align-items-center mb-3">
-              <select class="form-select w-auto ms-auto" id="sortSelect" style="min-width:180px" onchange="sortProducts(this.value)">
-                <option value="">Default Order</option>
-                <option value="priceAsc">Price: Low to High</option>
-                <option value="priceDesc">Price: High to Low</option>
-                <option value="nameAsc">Name: A to Z</option>
-                <option value="nameDesc">Name: Z to A</option>
-              </select>
-            </div>
             <!-- Product Grid -->
             <div id="productContainer" class="row gx-1 gx-md-2 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
               <!-- Product cards will be dynamically inserted here by JavaScript -->
@@ -681,6 +681,7 @@
     <script src="js/scripts.js"></script>
     <script>
       let allProducts = [];
+      let originalProducts = [];
       let currentPage = 1;
       const productsPerPage = 16;
       let filteredProducts = [];
@@ -1160,10 +1161,11 @@
       function handleProductsResponse(products) {
         sessionStorage.setItem(CACHE_KEY, JSON.stringify(products));
         sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-            allProducts = products;
-            filteredProducts = allProducts;
-            renderProducts(filteredProducts);
-            populateCategoryMenu();
+        allProducts = products;
+        originalProducts = products.slice(); // Save original order
+        filteredProducts = allProducts;
+        renderProducts(filteredProducts);
+        populateCategoryMenu();
       }
 
       // Update the checkout form submission handler
@@ -1562,15 +1564,11 @@
       }
 
       function sortProducts(sortBy) {
+        const keyword = document.getElementById("search").value.toLowerCase();
         if (!sortBy) {
-          // Reset to default order (original order from API)
-          filteredProducts = allProducts.filter(p => {
-            // Maintain any active category/search filters
-            const keyword = document.getElementById("search").value.toLowerCase();
-            return p.name.toLowerCase().includes(keyword);
-          });
+          // Restore original order and apply current filter
+          filteredProducts = originalProducts.filter(p => p.name.toLowerCase().includes(keyword));
         } else {
-          // Apply selected sort
           filteredProducts.sort((a, b) => {
             switch(sortBy) {
               case 'priceAsc':
@@ -1586,8 +1584,6 @@
             }
           });
         }
-
-        // Reset to first page and re-render
         currentPage = 1;
         renderProducts(filteredProducts);
       }
