@@ -347,7 +347,7 @@
       }
 
       header.bg-primary {
-        background-image: url('https://imghost.net/ib/WotXqWp3dgyIn5W_1747551229.png');
+        background-image: url('https://imghost.net/ib/6hGq0yCsek4jrYP_1747707539.png');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -956,6 +956,7 @@
         cartModal.hide();
       }
 
+      // Function to clear cart after order confirmation, avoid showing cart modal
       function clearCartAfterConfirmation() {
         cart = [];
         localStorage.removeItem("cart");
@@ -1163,6 +1164,9 @@
           console.error('Validation failed:', error.message);
           return; // Stop further execution if validation fails
         }
+
+        // Show the submission is in progress
+        showToast("Submitting your order...");        
         
         // Get and format the phone number with country code
         let phoneNumber = document.getElementById('custPhone').value.replace(/[^0-9]/g, '');
@@ -1196,10 +1200,7 @@
           uniqueCode: uniqueCode,
           orderId: generatedOrderId // Add the order ID to the data
         };
-        
-        // Show the submission is in progress
-        showToast("Submitting your order...");
-        
+               
         // Use JSONP for submission
         const callbackName = 'orderSubmitCallback_' + Date.now();
         window[callbackName] = function(response) {
