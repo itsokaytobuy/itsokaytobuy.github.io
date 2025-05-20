@@ -437,7 +437,7 @@
     <section class="py-5">
       <div class="container-fluid px-2 px-md-3 mt-5">
         <div class="row">
-          <!-- Category List Group Sidebar -->
+          <!-- Sidebar and mobile category dropdown as before -->
           <aside class="col-md-3 mb-4 d-none d-md-block">
             <div class="list-group" id="categoryListGroup">
               <button type="button" class="list-group-item list-group-item-action active" onclick="filterByCategory('All')">
@@ -446,32 +446,18 @@
               <!-- Categories will be dynamically inserted here -->
             </div>
           </aside>
-          <!-- Mobile category dropdown: only visible on mobile -->
-          <div class="mb-3 d-block d-md-none">
-            <select class="form-select" id="mobileCategoryDropdown" onchange="filterByCategory(this.value)">
-              <option value="All">All</option>
-              <!-- Categories will be dynamically inserted here -->
-            </select>
-          </div>
-          <!-- Add this after the mobile category dropdown -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-block d-md-none">
-              <!-- Your existing mobile category dropdown -->
-            </div>
-            
-            <!-- Sort dropdown -->
-            <div class="ms-auto">
-              <select class="form-select" id="sortSelect" onchange="sortProducts(this.value)">
-                <option value="">No sort</option>
+          <div class="col-md-9">
+            <!-- Sort menu row -->
+            <div class="d-flex justify-content-end align-items-center mb-3">
+              <select class="form-select w-auto ms-auto" id="sortSelect" style="min-width:180px" onchange="sortProducts(this.value)">
+                <option value="">Default Order</option>
                 <option value="priceAsc">Price: Low to High</option>
                 <option value="priceDesc">Price: High to Low</option>
                 <option value="nameAsc">Name: A to Z</option>
                 <option value="nameDesc">Name: Z to A</option>
               </select>
             </div>
-          </div>
-          <!-- Product Grid -->
-          <div class="col-md-9">
+            <!-- Product Grid -->
             <div id="productContainer" class="row gx-1 gx-md-2 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
               <!-- Product cards will be dynamically inserted here by JavaScript -->
             </div>
