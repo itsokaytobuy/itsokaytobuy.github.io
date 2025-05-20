@@ -365,6 +365,19 @@
         position: relative;
         z-index: 1;
       }
+
+      /* Add this to your existing styles */
+      #sortSelect {
+        min-width: 200px;
+        height: 38px;
+      }
+
+      @media (max-width: 576px) {
+        #sortSelect {
+          min-width: 140px;
+          font-size: 14px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -439,6 +452,23 @@
               <option value="All">All</option>
               <!-- Categories will be dynamically inserted here -->
             </select>
+          </div>
+          <!-- Add this after the mobile category dropdown -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-block d-md-none">
+              <!-- Your existing mobile category dropdown -->
+            </div>
+            
+            <!-- Sort dropdown -->
+            <div class="ms-auto">
+              <select class="form-select" id="sortSelect" onchange="sortProducts(this.value)">
+                <option value="">No sort</option>
+                <option value="priceAsc">Price: Low to High</option>
+                <option value="priceDesc">Price: High to Low</option>
+                <option value="nameAsc">Name: A to Z</option>
+                <option value="nameDesc">Name: Z to A</option>
+              </select>
+            </div>
           </div>
           <!-- Product Grid -->
           <div class="col-md-9">
@@ -834,8 +864,15 @@
       function filterProducts() {
         const keyword = document.getElementById("search").value.toLowerCase();
         filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes(keyword));
-        currentPage = 1;
-        renderProducts(filteredProducts);
+        
+        // Maintain current sort
+        const sortSelect = document.getElementById('sortSelect');
+        if (sortSelect.value) {
+          sortProducts(sortSelect.value);
+        } else {
+          currentPage = 1;
+          renderProducts(filteredProducts);
+        }
       }
 
       function changePage(direction) {
@@ -1419,8 +1456,16 @@
         } else {
           filteredProducts = allProducts.filter(p => p.category === category);
         }
-        currentPage = 1;
-        renderProducts(filteredProducts);
+        
+        // Maintain current sort
+        const sortSelect = document.getElementById('sortSelect');
+        if (sortSelect.value) {
+          sortProducts(sortSelect.value);
+        } else {
+          currentPage = 1;
+          renderProducts(filteredProducts);
+        }
+        
         renderPagination(Math.ceil(filteredProducts.length / productsPerPage));
         // Highlight active in sidebar
         document.querySelectorAll('#categoryListGroup .list-group-item').forEach(btn => {
@@ -1529,6 +1574,38 @@
           });
         }
       }
+
+      function sortProducts(sortBy) {
+        if (!sortBy) {
+          // Reset to default order (original order from API)
+          filteredProducts = allProducts.filter(p => {
+            // Maintain any active category/search filters
+            const keyword = document.getElementById("search").value.toLowerCase();
+            return p.name.toLowerCase().includes(keyword);
+          });
+        } else {
+          // Apply selected sort
+          filteredProducts.sort((a, b) => {
+            switch(sortBy) {
+              case 'priceAsc':
+                return a.price - b.price;
+              case 'priceDesc':
+                return b.price - a.price;
+              case 'nameAsc':
+                return a.name.localeCompare(b.name);
+              case 'nameDesc':
+                return b.name.localeCompare(a.name);
+              default:
+                return 0;
+            }
+          });
+        }
+
+        // Reset to first page and re-render
+        currentPage = 1;
+        renderProducts(filteredProducts);
+      }
+
     </script>
   </body>
 </html>
