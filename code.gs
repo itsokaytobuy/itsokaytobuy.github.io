@@ -25,7 +25,7 @@ function ensureSheetsExist() {
   // Check for Orders sheet
   if (!ss.getSheetByName("Orders")) {
     const ordersSheet = ss.insertSheet("Orders");
-    ordersSheet.appendRow(["orderId", "customerId", "date", "total", "status", "downPayment", "paymentMethod", "shippingOption", "shippingAddress"]);
+    ordersSheet.appendRow(["orderId", "customerId", "date", "total", "status", "downPayment", "paymentMethod", "shippingOption", "shippingAddress", "Send WA"]);
   }
   
   // Check for OrderItems sheet
@@ -300,7 +300,7 @@ function findOrCreateCustomer(customerId, name, email, phone, address) {
 }
 
 // Save order data to spreadsheet
-function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMethod, shippingOption, shippingAddress) {
+function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMethod, shippingOption, shippingAddress, customerName, customerPhone) {
   try {
     const sheet = getSpreadsheet().getSheetByName("Orders");
     const header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -315,7 +315,8 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
       downPayment: header.indexOf("downPayment"),
       paymentMethod: header.indexOf("paymentMethod"),
       shippingOption: header.indexOf("shippingOption"),
-      shippingAddress: header.indexOf("shippingAddress")
+      shippingAddress: header.indexOf("shippingAddress"),
+      sendWA: header.indexOf("Send WA") // Add this line
     };
     
     // Validate required columns exist
@@ -329,6 +330,18 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
     // Convert orderDate to UTC+7
     const utc7Date = Utilities.formatDate(orderDate, "GMT+7", "yyyy-MM-dd HH:mm:ss");
     
+    // WhatsApp message
+    const waMessage = 
+      `Hai kak, pesanan kakak ${customerName} dengan nomor ${orderId} statusnya masih PENDING, karena kami belum menerima bukti transfernya. Mohon segera mengirimkan bukti transfer agar pesanan kakak ${customerName} bisa segera kami konfirmasi ya. Terima kasih atas pesanan kakak di It'sOkaytoBuy!\n\n` +
+      `_Kalau kakak ${customerName} tidak merasa melakukan pemesanan, mungkin ada orang lain yang memesan dengan nomor WhatsApp kakak. Jika demikian, kakak bisa mengabaikan pesan ini_`;
+
+    // Format phone number for wa.me (remove + and non-digits)
+    const waPhone = customerPhone.replace(/\D/g, '');
+    const waLink = `https://wa.me/${waPhone}?text=${encodeURIComponent(waMessage)}`;
+
+    // Wrap with HYPERLINK formula for Google Sheets
+    const waUrl = `=HYPERLINK("${waLink}", "📱 Send Message")`;
+
     // Create row data array matching column order in sheet
     const rowData = new Array(header.length).fill("");
     rowData[columns.orderId] = orderId;
@@ -340,6 +353,7 @@ function saveOrder(customerId, orderId, orderDate, total, status, dp, paymentMet
     rowData[columns.paymentMethod] = paymentMethod;
     rowData[columns.shippingOption] = shippingOption;
     rowData[columns.shippingAddress] = shippingAddress;
+    rowData[columns.sendWA] = waUrl;
     
     sheet.appendRow(rowData);
     return true;
@@ -450,7 +464,9 @@ function doGet(e) {
       downPayment,
       paymentMethod,
       shippingOption,
-      customerAddress
+      customerAddress,
+      customerName,
+      customerPhone    
     );
 
     const orderItems = cart.map(item => ({
@@ -560,7 +576,9 @@ function doPost(e) {
       downPayment,
       paymentMethod,
       shippingOption,
-      customerAddress
+      customerAddress,
+      customerName,
+      customerPhone  
     );
     
     // Prepare order items - no need to generate UUIDs anymore
@@ -632,4 +650,34 @@ function doOptions(e) {
     .setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
     .setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
     .setHeader("Access-Control-Max-Age", "3600");
+}
+
+function testSaveOrder() {
+  const customerId = "cust-test-123456";
+  const orderId = "ORD-TEST-001";
+  const orderDate = new Date();
+  const total = 123456;
+  const status = "Pending";
+  const downPayment = 60000;
+  const paymentMethod = "bank_transfer";
+  const shippingOption = "GoSend";
+  const shippingAddress = "Jl. Testing No. 1, Test City";
+  const customerName = "Molen";
+  const customerPhone = "+6281228353333";
+
+  const result = saveOrder(
+    customerId,
+    orderId,
+    orderDate,
+    total,
+    status,
+    downPayment,
+    paymentMethod,
+    shippingOption,
+    shippingAddress,
+    customerName,
+    customerPhone
+  );
+
+  Logger.log("saveOrder result: " + result);
 }
