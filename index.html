@@ -435,7 +435,7 @@
 
     <!-- Section-->
     <section class="py-5">
-      <div class="container-fluid px-2 px-md-3 mt-5">
+      <div class="container-fluid px-2 px-md-3">
         <!-- Sort menu row -->
         <div class="d-flex justify-content-end align-items-center mb-3">
           <select class="form-select w-auto ms-auto" id="sortSelect" style="min-width:180px" onchange="sortProducts(this.value)">
@@ -1439,22 +1439,6 @@
 
       // Filter products by category
       function filterByCategory(category) {
-        if (category === 'All') {
-          filteredProducts = allProducts;
-        } else {
-          filteredProducts = allProducts.filter(p => p.category === category);
-        }
-        
-        // Maintain current sort
-        const sortSelect = document.getElementById('sortSelect');
-        if (sortSelect.value) {
-          sortProducts(sortSelect.value);
-        } else {
-          currentPage = 1;
-          renderProducts(filteredProducts);
-        }
-        
-        renderPagination(Math.ceil(filteredProducts.length / productsPerPage));
         // Highlight active in sidebar
         document.querySelectorAll('#categoryListGroup .list-group-item').forEach(btn => {
           btn.classList.toggle('active', btn.textContent === category);
@@ -1464,6 +1448,9 @@
         if (mobileDropdown) {
           mobileDropdown.value = category;
         }
+        // Always call sortProducts with the current sort value
+        const sortSelect = document.getElementById('sortSelect');
+        sortProducts(sortSelect.value);
       }
 
     function validateCartProducts() {
@@ -1565,10 +1552,31 @@
 
       function sortProducts(sortBy) {
         const keyword = document.getElementById("search").value.toLowerCase();
+
+        // Get current category from the active sidebar button
+        let category = 'All';
+        const activeBtn = document.querySelector('#categoryListGroup .list-group-item.active');
+        if (activeBtn && activeBtn.textContent) {
+          category = activeBtn.textContent.trim();
+        }
+
+        // Start from originalProducts
+        let productsToShow = originalProducts;
+
+        // Apply category filter
+        if (category !== 'All') {
+          productsToShow = productsToShow.filter(p => p.category === category);
+        }
+
+        // Apply search filter
+        productsToShow = productsToShow.filter(p => p.name.toLowerCase().includes(keyword));
+
         if (!sortBy) {
-          // Restore original order and apply current filter
-          filteredProducts = originalProducts.filter(p => p.name.toLowerCase().includes(keyword));
+          // No sort: just show products in original order, filtered by category and search
+          filteredProducts = productsToShow;
         } else {
+          // Apply sort to the filtered list
+          filteredProducts = productsToShow.slice(); // Copy array before sorting
           filteredProducts.sort((a, b) => {
             switch(sortBy) {
               case 'priceAsc':
@@ -1587,7 +1595,6 @@
         currentPage = 1;
         renderProducts(filteredProducts);
       }
-
     </script>
   </body>
 </html>
